@@ -30,6 +30,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.JCheckBox;
 
 public class ChatFrame extends JFrame {
 
@@ -58,7 +59,7 @@ public class ChatFrame extends JFrame {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ChatFrame.class.getResource("/Icons64/chat.png")));
 		setTitle("Chat");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 812, 583);
+		setBounds(100, 100, 813, 592);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -97,43 +98,43 @@ public class ChatFrame extends JFrame {
 		friendTree.setModel(new DefaultTreeModel(
 			new DefaultMutableTreeNode("MyFriends") {
 				{
-					DefaultMutableTreeNode node_1,node_2,node_3,node_4,node_5,node_6;
+					DefaultMutableTreeNode node_1;
 					node_1 = new DefaultMutableTreeNode("Group1");
 						node_1.add(new DefaultMutableTreeNode("friend1"));
 						node_1.add(new DefaultMutableTreeNode("friend2"));
 						node_1.add(new DefaultMutableTreeNode("friend3"));
 						node_1.add(new DefaultMutableTreeNode("friend4"));
 					add(node_1);
-					node_2 = new DefaultMutableTreeNode("Group2");
-						node_2.add(new DefaultMutableTreeNode("friend1"));
-						node_2.add(new DefaultMutableTreeNode("friend2"));
-						node_2.add(new DefaultMutableTreeNode("friend3"));
-						node_2.add(new DefaultMutableTreeNode("friend4"));
-					add(node_2);
-					node_3 = new DefaultMutableTreeNode("Group3");
-						node_3.add(new DefaultMutableTreeNode("friend1"));
-						node_3.add(new DefaultMutableTreeNode("friend2"));
-						node_3.add(new DefaultMutableTreeNode("friend3"));
-						node_3.add(new DefaultMutableTreeNode("friend4"));
-					add(node_3);
-					node_4 = new DefaultMutableTreeNode("Group4");
-						node_4.add(new DefaultMutableTreeNode("friend1"));
-						node_4.add(new DefaultMutableTreeNode("friend2"));
-						node_4.add(new DefaultMutableTreeNode("friend3"));
-						node_4.add(new DefaultMutableTreeNode("friend4"));
-					add(node_4);
-					node_5 = new DefaultMutableTreeNode("Group5");
-						node_5.add(new DefaultMutableTreeNode("friend1"));
-						node_5.add(new DefaultMutableTreeNode("friend2"));
-						node_5.add(new DefaultMutableTreeNode("friend3"));
-						node_5.add(new DefaultMutableTreeNode("friend4"));
-					add(node_5);
-					node_6 = new DefaultMutableTreeNode("Group6");
-						node_6.add(new DefaultMutableTreeNode("friend1"));
-						node_6.add(new DefaultMutableTreeNode("friend2"));
-						node_6.add(new DefaultMutableTreeNode("friend3"));
-						node_6.add(new DefaultMutableTreeNode("friend4"));
-					add(node_6);
+					node_1 = new DefaultMutableTreeNode("Group2");
+						node_1.add(new DefaultMutableTreeNode("friend1"));
+						node_1.add(new DefaultMutableTreeNode("friend2"));
+						node_1.add(new DefaultMutableTreeNode("friend3"));
+						node_1.add(new DefaultMutableTreeNode("friend4"));
+					add(node_1);
+					node_1 = new DefaultMutableTreeNode("Group3");
+						node_1.add(new DefaultMutableTreeNode("friend1"));
+						node_1.add(new DefaultMutableTreeNode("friend2"));
+						node_1.add(new DefaultMutableTreeNode("friend3"));
+						node_1.add(new DefaultMutableTreeNode("friend4"));
+					add(node_1);
+					node_1 = new DefaultMutableTreeNode("Group4");
+						node_1.add(new DefaultMutableTreeNode("friend1"));
+						node_1.add(new DefaultMutableTreeNode("friend2"));
+						node_1.add(new DefaultMutableTreeNode("friend3"));
+						node_1.add(new DefaultMutableTreeNode("friend4"));
+					add(node_1);
+					node_1 = new DefaultMutableTreeNode("Group5");
+						node_1.add(new DefaultMutableTreeNode("friend1"));
+						node_1.add(new DefaultMutableTreeNode("friend2"));
+						node_1.add(new DefaultMutableTreeNode("friend3"));
+						node_1.add(new DefaultMutableTreeNode("friend4"));
+					add(node_1);
+					node_1 = new DefaultMutableTreeNode("Group6");
+						node_1.add(new DefaultMutableTreeNode("friend1"));
+						node_1.add(new DefaultMutableTreeNode("friend2"));
+						node_1.add(new DefaultMutableTreeNode("friend3"));
+						node_1.add(new DefaultMutableTreeNode("friend4"));
+					add(node_1);
 				}
 			}
 		));
@@ -178,6 +179,10 @@ public class ChatFrame extends JFrame {
 		menu.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/Category.png")));
 		menuBar.add(menu);
 		
+		JMenuItem mntmAddFriend = new JMenuItem("Add Friend");
+		mntmAddFriend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/add.png")));
+		menu.add(mntmAddFriend);
+		
 		JMenuItem menuItemSetting = new JMenuItem("Settings...");
 		menuItemSetting.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/set.png")));
 		menu.add(menuItemSetting);
@@ -212,9 +217,9 @@ public class ChatFrame extends JFrame {
 		panel_8.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_2 = new JPanel();
-		panel_2.setPreferredSize(new Dimension(160, 0));
+		panel_2.setPreferredSize(new Dimension(200, 0));
 		panel_8.add(panel_2, BorderLayout.WEST);
-		panel_2.setLayout(new GridLayout(1, 4, 0, 0));
+		panel_2.setLayout(new GridLayout(1, 5, 0, 0));
 		
 		JButton btnFace = new JButton("");
 		btnFace.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/Smile.png")));
@@ -231,6 +236,10 @@ public class ChatFrame extends JFrame {
 		JButton btnCapture = new JButton("");
 		btnCapture.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/cut.png")));
 		panel_2.add(btnCapture);
+		
+		JButton button = new JButton("");
+		button.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/font.png")));
+		panel_2.add(button);
 		
 		JPanel panel_7 = new JPanel();
 		panel_7.setPreferredSize(new Dimension(80, 0));
@@ -259,9 +268,15 @@ public class ChatFrame extends JFrame {
 		panel_6.add(panel_10, BorderLayout.SOUTH);
 		panel_10.setLayout(new BorderLayout(0, 0));
 		
+		JPanel panel_12 = new JPanel();
+		panel_10.add(panel_12, BorderLayout.EAST);
+		
+		JCheckBox chckbxTranslate = new JCheckBox("Translate");
+		panel_12.add(chckbxTranslate);
+		
 		JButton btnSend = new JButton("Send");
 		btnSend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/send.png")));
-		panel_10.add(btnSend, BorderLayout.EAST);
+		panel_12.add(btnSend);
 	}
 	
 	private static void addPopup(Component component, final JPopupMenu popup) {
