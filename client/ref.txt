@@ -1,0 +1,3 @@
+-------------------smack interface-------------------
+http://download.igniterealtime.org/smack/docs/latest/documentation/
+http://download.igniterealtime.org/smack/docs/latest/javadoc/
