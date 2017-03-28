@@ -180,7 +180,7 @@ public class ChatFrame extends JFrame {
 		menuBar.add(menu);
 		
 		JMenuItem mntmAddFriend = new JMenuItem("Add Friend");
-		mntmAddFriend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/add.png")));
+		mntmAddFriend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/friend_add.png")));
 		menu.add(mntmAddFriend);
 		
 		JMenuItem menuItemSetting = new JMenuItem("Settings...");

@@ -1,6 +1,7 @@
 package com.chat.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -15,13 +16,16 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.JCheckBox;
+import java.awt.Color;
+import java.awt.Font;
 
 public class LoginFrame extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField textField;
 	private JTextField textField_1;
-	private JTextField textField_2;
+	private JTextField textUsername;
 	private JPasswordField passwordField;
 
 	/**
@@ -68,9 +72,9 @@ public class LoginFrame extends JFrame {
 		lblUsername.setIcon(new ImageIcon(LoginFrame.class.getResource("/Icons16/user.png")));
 		panel_2.add(lblUsername);
 		
-		textField_2 = new JTextField();
-		panel_2.add(textField_2);
-		textField_2.setColumns(15);
+		textUsername = new JTextField();
+		panel_2.add(textUsername);
+		textUsername.setColumns(15);
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setOpaque(false);
@@ -87,27 +91,36 @@ public class LoginFrame extends JFrame {
 		JPanel panel_4 = new JPanel();
 		panel_4.setOpaque(false);
 		contentPane.add(panel_4);
-		panel_4.setLayout(new BorderLayout(0, 0));
+		panel_4.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		
+		JCheckBox chckbxRememberPassword = new JCheckBox("Remember Password               ");
+		panel_4.add(chckbxRememberPassword);
 		
 		JButton btnLogin = new JButton("Login");
-		panel_4.add(btnLogin, BorderLayout.CENTER);
-		
-		JLabel label = new JLabel("              ");
-		panel_4.add(label, BorderLayout.WEST);
-		
-		JLabel label_1 = new JLabel("              ");
-		panel_4.add(label_1, BorderLayout.EAST);
+		btnLogin.setFont(UIManager.getFont("Button.font"));
+		panel_4.add(btnLogin);
 		
 		JPanel panel = new JPanel();
 		panel.setOpaque(false);
 		contentPane.add(panel);
 		panel.setLayout(new BorderLayout(0, 0));
 		
-		JButton btnNewButton = new JButton("Register");
-		panel.add(btnNewButton, BorderLayout.WEST);
+		Color c = new Color(0,0,255);
+		JButton btnRegister = new JButton("  Register");
+		btnRegister.setFont(UIManager.getFont("Button.font"));
+		btnRegister.setForeground(new Color(51, 102, 204));
+		btnRegister.setBackground(c);
+		btnRegister.setOpaque(false);
+		btnRegister.setBorder(null);
+		panel.add(btnRegister, BorderLayout.WEST);
 		
-		JButton btnNewButton_1 = new JButton("Forget password");
-		panel.add(btnNewButton_1, BorderLayout.EAST);
+		JButton btnForgetPswd = new JButton("Forget password?  ");
+		btnForgetPswd.setFont(UIManager.getFont("Button.font"));
+		btnForgetPswd.setForeground(new Color(51, 102, 204));
+		btnForgetPswd.setBackground(c);
+		btnForgetPswd.setOpaque(false);
+		btnForgetPswd.setBorder(null);
+		panel.add(btnForgetPswd, BorderLayout.EAST);
 		
 		JLabel label_2 = new JLabel("     ");
 		panel.add(label_2, BorderLayout.NORTH);
