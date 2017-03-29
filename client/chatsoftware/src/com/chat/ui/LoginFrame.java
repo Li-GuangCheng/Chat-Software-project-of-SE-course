@@ -1,7 +1,6 @@
 package com.chat.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -18,13 +17,10 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JCheckBox;
 import java.awt.Color;
-import java.awt.Font;
 
 public class LoginFrame extends JFrame {
 
 	private JPanel contentPane;
-	private JTextField textField;
-	private JTextField textField_1;
 	private JTextField textUsername;
 	private JPasswordField passwordField;
 
@@ -59,9 +55,22 @@ public class LoginFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(new GridLayout(5, 1, 8, 8));
 		
+		Color c = new Color(0,0,255);
+		
 		JPanel panel_1 = new JPanel();
 		panel_1.setOpaque(false);
 		contentPane.add(panel_1);
+		panel_1.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_5 = new JPanel();
+		panel_1.add(panel_5, BorderLayout.EAST);
+		
+		JButton btnNetworkSettings = new JButton("");
+		btnNetworkSettings.setBackground(c);
+		btnNetworkSettings.setOpaque(false);
+		btnNetworkSettings.setBorder(null);
+		btnNetworkSettings.setIcon(new ImageIcon(LoginFrame.class.getResource("/Icons16/network.png")));
+		panel_5.add(btnNetworkSettings);
 		
 		JPanel panel_2 = new JPanel();
 		panel_2.setOpaque(false);
@@ -105,7 +114,6 @@ public class LoginFrame extends JFrame {
 		contentPane.add(panel);
 		panel.setLayout(new BorderLayout(0, 0));
 		
-		Color c = new Color(0,0,255);
 		JButton btnRegister = new JButton("  Register");
 		btnRegister.setFont(UIManager.getFont("Button.font"));
 		btnRegister.setForeground(new Color(51, 102, 204));
