@@ -6,7 +6,7 @@ Anybody can use the source code under the [MIT License](https://github.com/Li-Gu
 
 ## Features
 
-### Development
+## Development
 ### Server
 Our server is based on OpenFire, and the basic principle of server side is minimize modification.
 ### Client
