@@ -16,7 +16,11 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+
 import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class LoginFrame extends JFrame {
 
@@ -66,6 +70,13 @@ public class LoginFrame extends JFrame {
 		panel_1.add(panel_5, BorderLayout.EAST);
 		
 		JButton btnNetworkSettings = new JButton("");
+		btnNetworkSettings.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				NetworkSettingDialog dialog = new NetworkSettingDialog();
+				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				dialog.setVisible(true);
+			}
+		});
 		btnNetworkSettings.setBackground(c);
 		btnNetworkSettings.setOpaque(false);
 		btnNetworkSettings.setBorder(null);
