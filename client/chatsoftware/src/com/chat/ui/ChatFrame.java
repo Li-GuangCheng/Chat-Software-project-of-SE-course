@@ -28,13 +28,22 @@ import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.JCheckBox;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ChatFrame extends JFrame {
 
 	private JPanel contentPane;
+	//textPane is the record about the textfield. 
+	//textMessage is the input textfidld.
+	private static JTextPane textPane, textMessage;
 
 	/**
 	 * Launch the application.
@@ -205,6 +214,9 @@ public class ChatFrame extends JFrame {
 		JScrollPane scrollPane_1 = new JScrollPane();
 		panel_5.add(scrollPane_1, BorderLayout.CENTER);
 		
+		textPane = new JTextPane();
+		scrollPane_1.setViewportView(textPane);
+		
 		JPanel panel_6 = new JPanel();
 		panel_6.setBorder(new EmptyBorder(1, 0, 0, 0));
 		panel_6.setPreferredSize(new Dimension(0, 150));
@@ -258,7 +270,7 @@ public class ChatFrame extends JFrame {
 		panel_6.add(panel_9, BorderLayout.CENTER);
 		panel_9.setLayout(new BorderLayout(0, 0));
 		
-		JTextPane textMessage = new JTextPane();
+		textMessage = new JTextPane();
 		textMessage.setBackground(UIManager.getColor("Panel.background"));
 		JScrollPane scrollPane = new JScrollPane(textMessage);
 		panel_9.add(scrollPane, BorderLayout.CENTER);
@@ -275,6 +287,25 @@ public class ChatFrame extends JFrame {
 		panel_12.add(chckbxTranslate);
 		
 		JButton btnSend = new JButton("Send");
+		// the send function of the Send Button.
+		btnSend.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String msg = textMessage.getText();
+				
+				if(intsertMsg(msg)){
+					try {
+						System.out.println("Message sent out successfully :" + msg);
+						//Message was successfully sent out. Cleat the textfield.
+						clearInputField();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}else{
+					System.out.println("Message sent out failed.");
+				}
+			}
+		});
 		btnSend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/send.png")));
 		panel_12.add(btnSend);
 	}
@@ -295,6 +326,40 @@ public class ChatFrame extends JFrame {
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}
 		});
+	}
+	
+	/**
+	 * Insert the message to the ChatArea
+	 * @param msg
+	 * @return whether the operation is success.
+	 */
+	public static boolean intsertMsg(String msg) {
+		boolean result = false;
+		try {
+			StyledDocument doc = textPane.getStyledDocument();
+			// Set font.
+			SimpleAttributeSet attr = new SimpleAttributeSet();
+
+			// insert String to the ChatArea.
+			doc.insertString(doc.getLength(), msg + "\n", attr);
+			
+			result = true;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Clear the input message of the input textfield.
+	 * @throws Exception
+	 */
+	public static void clearInputField() throws Exception {
+		if(textMessage != null) {
+			textMessage.setText("");
+		}
 	}
 
 }
