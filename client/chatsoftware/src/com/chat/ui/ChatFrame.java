@@ -9,11 +9,17 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -29,14 +35,13 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.JCheckBox;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+
+import org.jivesoftware.smack.util.StringUtils;
+
+import llj.testcode.ShakeFrame;
 
 public class ChatFrame extends JFrame {
 
@@ -44,6 +49,8 @@ public class ChatFrame extends JFrame {
 	//textPane is the record about the textfield. 
 	//textMessage is the input textfidld.
 	private static JTextPane textPane, textMessage;
+	private static JDialog emojiDialog = new JDialog();;
+	private static boolean isEmojiOpen = false;
 
 	/**
 	 * Launch the application.
@@ -53,6 +60,7 @@ public class ChatFrame extends JFrame {
 			public void run() {
 				try {
 					ChatFrame frame = new ChatFrame();
+					setLocationCenter(frame);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -68,7 +76,7 @@ public class ChatFrame extends JFrame {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ChatFrame.class.getResource("/Icons64/chat.png")));
 		setTitle("Chat");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 813, 592);
+		setSize(813, 592);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -234,14 +242,42 @@ public class ChatFrame extends JFrame {
 		panel_2.setLayout(new GridLayout(1, 5, 0, 0));
 		
 		JButton btnFace = new JButton("");
+		emojiDialog();
+		btnFace.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				showEmojiDialog(btnFace);
+			}
+		});
 		btnFace.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/Smile.png")));
 		panel_2.add(btnFace);
 		
 		JButton btnFile = new JButton("");
+		btnFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JFileChooser jfc=new JFileChooser();
+				jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
+				jfc.showDialog(new JLabel(), "Choose");
+				jfc.setDialogTitle("Choose a file");
+				File file=jfc.getSelectedFile();
+				if(file != null) {
+					if(file.isDirectory()){
+						System.out.println("Folder:"+file.getAbsolutePath());
+					}else if(file.isFile()){
+						System.out.println("File:"+file.getAbsolutePath());
+					}
+					System.out.println(jfc.getSelectedFile().getName());
+				}
+			}
+		});
 		btnFile.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/folder.png")));
 		panel_2.add(btnFile);
 		
 		JButton btnShake = new JButton("");
+		btnShake.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				shakeFrame();
+			}
+		});
 		btnShake.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons32/shake.png")));
 		panel_2.add(btnShake);
 		
@@ -291,19 +327,25 @@ public class ChatFrame extends JFrame {
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String msg = textMessage.getText();
-				
-				if(intsertMsg(msg)){
-					try {
-						System.out.println("Message sent out successfully :" + msg);
-						//Message was successfully sent out. Cleat the textfield.
-						clearInputField();
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+				if(!StringUtils.isEmpty(msg)){
+					if(intsertMsg(msg)){
+						try {
+							System.out.println("Message sent out successfully :" + msg);
+							//Message was successfully sent out. Cleat the textfield.
+							clearInputField();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}else{
+						//TODO This part show be changed to a message box to inform user of instruction.
+						System.out.println("Message sent out failed.");
 					}
 				}else{
-					System.out.println("Message sent out failed.");
+					//TODO This part show be changed to a message box to inform user of instruction.
+					System.out.println("The sending message cannot be empty.");
 				}
+				
 			}
 		});
 		btnSend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/send.png")));
@@ -359,6 +401,85 @@ public class ChatFrame extends JFrame {
 	public static void clearInputField() throws Exception {
 		if(textMessage != null) {
 			textMessage.setText("");
+		}
+	}
+	
+	/**
+	 * Create the dialog.
+	 */
+	public void emojiDialog() {
+		final JPanel contentPanel = new JPanel();
+		
+		emojiDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		emojiDialog.setUndecorated(true);
+		
+		emojiDialog.setSize(400, 240);
+		emojiDialog.getContentPane().setLayout(new BorderLayout());
+		contentPanel.setBackground(new Color(255, 250, 240));
+		contentPanel.setLayout(new BorderLayout());
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		emojiDialog.getContentPane().add(contentPanel, BorderLayout.CENTER);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setOpaque(false);
+		scrollPane.getViewport().setOpaque(false);
+		scrollPane.setBorder(null);
+		contentPanel.add(scrollPane, BorderLayout.CENTER);
+	}
+	
+	/**
+	 * show the emoji dialog relative to the facial button (above the facial btn).
+	 * @param btn
+	 */
+	public void showEmojiDialog(JButton btn){
+		if(isEmojiOpen){//if the dialog is shown, hide it.
+			emojiDialog.setVisible(false);
+			isEmojiOpen = false;
+		}else{// if the dialog is hidden, show it.
+			emojiDialog.setLocationRelativeTo(btn);
+			emojiDialog.setLocation((int)(emojiDialog.getLocation().getX() + emojiDialog.getWidth()/2 - btn.getWidth()/2 + 2), (int)(emojiDialog.getLocation().getY() - emojiDialog.getHeight()/2 - btn.getHeight()/2 - 2));
+			emojiDialog.setVisible(true);
+			isEmojiOpen = true;
+		}
+	}
+	
+	/**
+	 * Move the component to the center of the screen.
+	 * @param component
+	 */
+	public static void setLocationCenter(Component component) {
+	    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  
+	    Dimension compSize = component.getSize();  
+	    if (compSize.height > screenSize.height) {  
+	        compSize.height = screenSize.height;  
+	    }  
+	    if (compSize.width > screenSize.width) {  
+	        compSize.width = screenSize.width;  
+	    }  
+	    component.setLocation((screenSize.width - compSize.width) / 2,  
+	            (screenSize.height - compSize.height) / 2);  
+	}
+	
+	/**
+	 * Shake the chatting window.
+	 */
+	public void shakeFrame() {
+		int x = ChatFrame.this.getX();
+		int y = ChatFrame.this.getY();
+		for (int i = 0; i < 20; i++) {
+			if ((i & 1) == 0) {
+				x += 3;
+				y += 3;
+			} else {
+				x -= 3;
+				y -= 3;
+			}
+			ChatFrame.this.setLocation(x, y);
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 
