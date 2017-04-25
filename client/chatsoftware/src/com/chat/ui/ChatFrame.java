@@ -41,8 +41,6 @@ import javax.swing.tree.DefaultTreeModel;
 
 import org.jivesoftware.smack.util.StringUtils;
 
-import llj.testcode.ShakeFrame;
-
 public class ChatFrame extends JFrame {
 
 	private JPanel contentPane;
@@ -59,7 +57,7 @@ public class ChatFrame extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ChatFrame frame = new ChatFrame();
+					ChatFrame frame = new ChatFrame(null);
 					setLocationCenter(frame);
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -72,7 +70,7 @@ public class ChatFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ChatFrame() {
+	public ChatFrame(JFrame loginFrame) {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ChatFrame.class.getResource("/Icons64/chat.png")));
 		setTitle("Chat");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -212,6 +210,26 @@ public class ChatFrame extends JFrame {
 		menu.add(separator);
 		
 		JMenuItem menuItemLogout = new JMenuItem("Logout");
+		menuItemLogout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					if(LoginFrame.heartBeats != null){
+						LoginFrame.heartBeats.stop();
+					}
+					if(LoginFrame.connection != null){
+						LoginFrame.connection.disconnect();
+					}
+					Thread.sleep(3000);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				ChatFrame.this.setVisible(false);
+				if(loginFrame != null){
+					loginFrame.setVisible(true);
+				}
+			}
+		});
 		menuItemLogout.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/ext.png")));
 		menu.add(menuItemLogout);
 		

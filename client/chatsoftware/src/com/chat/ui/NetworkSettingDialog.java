@@ -15,7 +15,7 @@ import java.awt.Toolkit;
 public class NetworkSettingDialog extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
-	public static String serverAddr = "chat-server-db.c5xzyfkbtatb.ap-southeast-1.rds.amazonaws.com";
+	public static String serverAddr = "ec2-54-254-130-230.ap-southeast-1.compute.amazonaws.com";
 	public static int serverPort = 5222;
 	private JTextField txtIP;
 	private JTextField textField;

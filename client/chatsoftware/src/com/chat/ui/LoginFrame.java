@@ -1,32 +1,41 @@
 package com.chat.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 
-import java.awt.Color;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import org.jivesoftware.smack.AbstractXMPPConnection;
+import org.jivesoftware.smack.util.StringUtils;
+
+import com.llj.network.SeverConnection;
 
 public class LoginFrame extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField textUsername;
-	private JPasswordField passwordField;
+	private JPasswordField textPassword;
+	private static String username;
+	private static String password;
+	public static AbstractXMPPConnection connection;
+	public static Thread heartBeats;
 
 	/**
 	 * Launch the application.
@@ -36,6 +45,7 @@ public class LoginFrame extends JFrame {
 			public void run() {
 				try {
 					LoginFrame frame = new LoginFrame();
+					ChatFrame.setLocationCenter(frame);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -104,9 +114,9 @@ public class LoginFrame extends JFrame {
 		lblPassword.setIcon(new ImageIcon(LoginFrame.class.getResource("/Icons16/lock.png")));
 		panel_3.add(lblPassword);
 		
-		passwordField = new JPasswordField();
-		passwordField.setColumns(15);
-		panel_3.add(passwordField);
+		textPassword = new JPasswordField();
+		textPassword.setColumns(15);
+		panel_3.add(textPassword);
 		
 		JPanel panel_4 = new JPanel();
 		panel_4.setOpaque(false);
@@ -117,6 +127,33 @@ public class LoginFrame extends JFrame {
 		panel_4.add(chckbxRememberPassword);
 		
 		JButton btnLogin = new JButton("Login");
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				username = textUsername.getText().trim();
+				password = new String(textPassword.getPassword());
+				if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password)){
+					JOptionPane.showMessageDialog(null, "Please input your username and password!", "Warnning", JOptionPane.WARNING_MESSAGE); 
+				}else{
+					System.out.println("username is '"+username+"'");
+					System.out.println("password is '"+password+"'");
+					connection = SeverConnection.login("lgc", "111111");
+					heartBeats = SeverConnection.heartBeats(connection);
+					if(connection.isConnected()){
+						if(connection.isAuthenticated()){
+							LoginFrame.this.setVisible(false);
+							System.out.println("Successfully login to the server.");
+							ChatFrame frame = new ChatFrame(LoginFrame.this);
+							ChatFrame.setLocationCenter(frame);
+							frame.setVisible(true);
+						}else{
+							JOptionPane.showMessageDialog(null, "Authentication failed!", "Warning", JOptionPane.WARNING_MESSAGE); 
+						}
+					}else{
+						JOptionPane.showMessageDialog(null, "Failed to connnect to server!", "Error", JOptionPane.ERROR_MESSAGE); 
+					}
+				}
+			}
+		});
 		btnLogin.setFont(UIManager.getFont("Button.font"));
 		panel_4.add(btnLogin);
 		
