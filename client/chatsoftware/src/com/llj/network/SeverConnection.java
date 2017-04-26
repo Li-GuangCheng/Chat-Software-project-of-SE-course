@@ -172,6 +172,20 @@ public class SeverConnection {
 		return connection;
 	}
 	
+	public static ChatManager getChatManager(AbstractXMPPConnection connection){
+		if(connection != null){
+			return ChatManager.getInstanceFor(connection);
+		}else{
+			return null;
+		}
+		
+	}
+	
+	//Judge whether the conncetion is validate.
+	public static boolean isConnectionValid(AbstractXMPPConnection connection){
+		return (connection.isConnected() && connection.isAuthenticated());
+	}
+	
 	public static void main(String[] args) {
 		AbstractXMPPConnection connection = login("lgc", "111111");
 		heartBeats(connection);

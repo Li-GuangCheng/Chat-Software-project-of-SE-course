@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Date;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -35,11 +36,19 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
+import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.chat.Chat;
+import org.jivesoftware.smack.chat.ChatManager;
+import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.StringUtils;
+
+import com.llj.network.SeverConnection;
+import com.llj.util.DateUtil;
 
 public class ChatFrame extends JFrame {
 
@@ -49,6 +58,8 @@ public class ChatFrame extends JFrame {
 	private static JTextPane textPane, textMessage;
 	private static JDialog emojiDialog = new JDialog();;
 	private static boolean isEmojiOpen = false;
+	private static ChatManager chatManager = null;
+	private static Chat chat = null;
 
 	/**
 	 * Launch the application.
@@ -79,6 +90,10 @@ public class ChatFrame extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
+		
+		//
+		initManager();
+		chat = chatWith("lh");
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(UIManager.getColor("Panel.background"));
@@ -346,19 +361,29 @@ public class ChatFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				String msg = textMessage.getText();
 				if(!StringUtils.isEmpty(msg)){
-					if(intsertMsg(msg)){
-						try {
-							System.out.println("Message sent out successfully :" + msg);
-							//Message was successfully sent out. Cleat the textfield.
-							clearInputField();
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+					Message msgTo = new Message();
+					msgTo.setBody(msg);
+					try {
+						chat.sendMessage(msgTo);
+						String insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + msg;
+						if(intsertMsg(insertMsg, 1)){
+							try {
+								System.out.println("Message sent out successfully :" + msg);
+								//Message was successfully sent out. Cleat the textfield.
+								clearInputField();
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}else{
+							//TODO This part show be changed to a message box to inform user of instruction.
+							System.out.println("Message sent out failed.");
 						}
-					}else{
-						//TODO This part show be changed to a message box to inform user of instruction.
-						System.out.println("Message sent out failed.");
+					} catch (NotConnectedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
+					
 				}else{
 					//TODO This part show be changed to a message box to inform user of instruction.
 					System.out.println("The sending message cannot be empty.");
@@ -368,6 +393,20 @@ public class ChatFrame extends JFrame {
 		});
 		btnSend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/send.png")));
 		panel_12.add(btnSend);
+		
+		
+	}
+	
+	private static void initManager(){
+		if(LoginFrame.connection != null && SeverConnection.isConnectionValid(LoginFrame.connection)){
+			chatManager = SeverConnection.getChatManager(LoginFrame.connection);
+			chatManager.addChatListener(new LLJChatMessageListener(textPane, textMessage));
+		}
+	}
+	
+	public static Chat chatWith(String userJID){
+		Chat chat = chatManager.createChat(userJID+"@"+SeverConnection.xmppDomain);
+		return chat;
 	}
 	
 	private static void addPopup(Component component, final JPopupMenu popup) {
@@ -390,16 +429,20 @@ public class ChatFrame extends JFrame {
 	
 	/**
 	 * Insert the message to the ChatArea
-	 * @param msg
+	 * @param msg, msgType
+	 * 		msgType=0 means from, msgType=1 means to, msgType=xxxx...TBD
 	 * @return whether the operation is success.
 	 */
-	public static boolean intsertMsg(String msg) {
+	public static boolean intsertMsg(String msg, int msgType) {
 		boolean result = false;
 		try {
 			StyledDocument doc = textPane.getStyledDocument();
 			// Set font.
 			SimpleAttributeSet attr = new SimpleAttributeSet();
-
+			if(msgType == 0)
+				StyleConstants.setForeground(attr,Color.red);
+			if(msgType == 1)
+				StyleConstants.setForeground(attr,Color.BLUE);
 			// insert String to the ChatArea.
 			doc.insertString(doc.getLength(), msg + "\n", attr);
 			
