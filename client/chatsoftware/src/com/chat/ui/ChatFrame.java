@@ -11,9 +11,12 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Collection;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
@@ -38,19 +41,20 @@ import javax.swing.border.LineBorder;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.roster.Roster;
+import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.util.StringUtils;
 
 import com.llj.network.SeverConnection;
 import com.llj.util.DateUtil;
 
-public class ChatFrame extends JFrame {
+public class ChatFrame extends JFrame implements KeyListener {
 
 	private JPanel contentPane;
 	//textPane is the record about the textfield. 
@@ -58,7 +62,8 @@ public class ChatFrame extends JFrame {
 	private static JTextPane textPane, textMessage;
 	private static JDialog emojiDialog = new JDialog();;
 	private static boolean isEmojiOpen = false;
-	private static ChatManager chatManager = null;
+	private static ChatManager chatManager = null;// ChatManager used to create Chat.
+	private static Roster roster = null;// Friends list
 	private static Chat chat = null;
 
 	/**
@@ -92,7 +97,7 @@ public class ChatFrame extends JFrame {
 		setContentPane(contentPane);
 		
 		//
-		initManager();
+		initManager(ChatFrame.this);
 		chat = chatWith("lh");
 		
 		JPanel panel = new JPanel();
@@ -125,50 +130,52 @@ public class ChatFrame extends JFrame {
 		panel.add(scrollPane_2, BorderLayout.CENTER);
 		
 		JTree friendTree = new JTree();
-		friendTree.setModel(new DefaultTreeModel(
-			new DefaultMutableTreeNode("MyFriends") {
-				{
-					DefaultMutableTreeNode node_1;
-					node_1 = new DefaultMutableTreeNode("Group1");
-						node_1.add(new DefaultMutableTreeNode("friend1"));
-						node_1.add(new DefaultMutableTreeNode("friend2"));
-						node_1.add(new DefaultMutableTreeNode("friend3"));
-						node_1.add(new DefaultMutableTreeNode("friend4"));
-					add(node_1);
-					node_1 = new DefaultMutableTreeNode("Group2");
-						node_1.add(new DefaultMutableTreeNode("friend1"));
-						node_1.add(new DefaultMutableTreeNode("friend2"));
-						node_1.add(new DefaultMutableTreeNode("friend3"));
-						node_1.add(new DefaultMutableTreeNode("friend4"));
-					add(node_1);
-					node_1 = new DefaultMutableTreeNode("Group3");
-						node_1.add(new DefaultMutableTreeNode("friend1"));
-						node_1.add(new DefaultMutableTreeNode("friend2"));
-						node_1.add(new DefaultMutableTreeNode("friend3"));
-						node_1.add(new DefaultMutableTreeNode("friend4"));
-					add(node_1);
-					node_1 = new DefaultMutableTreeNode("Group4");
-						node_1.add(new DefaultMutableTreeNode("friend1"));
-						node_1.add(new DefaultMutableTreeNode("friend2"));
-						node_1.add(new DefaultMutableTreeNode("friend3"));
-						node_1.add(new DefaultMutableTreeNode("friend4"));
-					add(node_1);
-					node_1 = new DefaultMutableTreeNode("Group5");
-						node_1.add(new DefaultMutableTreeNode("friend1"));
-						node_1.add(new DefaultMutableTreeNode("friend2"));
-						node_1.add(new DefaultMutableTreeNode("friend3"));
-						node_1.add(new DefaultMutableTreeNode("friend4"));
-					add(node_1);
-					node_1 = new DefaultMutableTreeNode("Group6");
-						node_1.add(new DefaultMutableTreeNode("friend1"));
-						node_1.add(new DefaultMutableTreeNode("friend2"));
-						node_1.add(new DefaultMutableTreeNode("friend3"));
-						node_1.add(new DefaultMutableTreeNode("friend4"));
-					add(node_1);
-				}
-			}
-		));
-		scrollPane_2.setViewportView(friendTree);
+//		friendTree.setModel(new DefaultTreeModel(
+//			new DefaultMutableTreeNode("MyFriends") {
+//				{
+//					DefaultMutableTreeNode node_1;
+//					node_1 = new DefaultMutableTreeNode("Group1");
+//						node_1.add(new DefaultMutableTreeNode("friend1"));
+//						node_1.add(new DefaultMutableTreeNode("friend2"));
+//						node_1.add(new DefaultMutableTreeNode("friend3"));
+//						node_1.add(new DefaultMutableTreeNode("friend4"));
+//					add(node_1);
+//					node_1 = new DefaultMutableTreeNode("Group2");
+//						node_1.add(new DefaultMutableTreeNode("friend1"));
+//						node_1.add(new DefaultMutableTreeNode("friend2"));
+//						node_1.add(new DefaultMutableTreeNode("friend3"));
+//						node_1.add(new DefaultMutableTreeNode("friend4"));
+//					add(node_1);
+//					node_1 = new DefaultMutableTreeNode("Group3");
+//						node_1.add(new DefaultMutableTreeNode("friend1"));
+//						node_1.add(new DefaultMutableTreeNode("friend2"));
+//						node_1.add(new DefaultMutableTreeNode("friend3"));
+//						node_1.add(new DefaultMutableTreeNode("friend4"));
+//					add(node_1);
+//					node_1 = new DefaultMutableTreeNode("Group4");
+//						node_1.add(new DefaultMutableTreeNode("friend1"));
+//						node_1.add(new DefaultMutableTreeNode("friend2"));
+//						node_1.add(new DefaultMutableTreeNode("friend3"));
+//						node_1.add(new DefaultMutableTreeNode("friend4"));
+//					add(node_1);
+//					node_1 = new DefaultMutableTreeNode("Group5");
+//						node_1.add(new DefaultMutableTreeNode("friend1"));
+//						node_1.add(new DefaultMutableTreeNode("friend2"));
+//						node_1.add(new DefaultMutableTreeNode("friend3"));
+//						node_1.add(new DefaultMutableTreeNode("friend4"));
+//					add(node_1);
+//					node_1 = new DefaultMutableTreeNode("Group6");
+//						node_1.add(new DefaultMutableTreeNode("friend1"));
+//						node_1.add(new DefaultMutableTreeNode("friend2"));
+//						node_1.add(new DefaultMutableTreeNode("friend3"));
+//						node_1.add(new DefaultMutableTreeNode("friend4"));
+//					add(node_1);
+//				}
+//			}
+//		));
+//		scrollPane_2.setViewportView(friendTree);
+		
+		initFriendTree(friendTree, scrollPane_2);
 		
 		JPanel panel_1 = new JPanel();
 		contentPane.add(panel_1, BorderLayout.CENTER);
@@ -256,6 +263,7 @@ public class ChatFrame extends JFrame {
 		panel_5.add(scrollPane_1, BorderLayout.CENTER);
 		
 		textPane = new JTextPane();
+		textPane.setEditable(false);
 		scrollPane_1.setViewportView(textPane);
 		
 		JPanel panel_6 = new JPanel();
@@ -308,6 +316,7 @@ public class ChatFrame extends JFrame {
 		JButton btnShake = new JButton("");
 		btnShake.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				sendShake();
 				shakeFrame();
 			}
 		});
@@ -340,6 +349,7 @@ public class ChatFrame extends JFrame {
 		panel_9.setLayout(new BorderLayout(0, 0));
 		
 		textMessage = new JTextPane();
+		textMessage.addKeyListener(this);
 		textMessage.setBackground(UIManager.getColor("Panel.background"));
 		JScrollPane scrollPane = new JScrollPane(textMessage);
 		panel_9.add(scrollPane, BorderLayout.CENTER);
@@ -359,36 +369,7 @@ public class ChatFrame extends JFrame {
 		// the send function of the Send Button.
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				String msg = textMessage.getText();
-				if(!StringUtils.isEmpty(msg)){
-					Message msgTo = new Message();
-					msgTo.setBody(msg);
-					try {
-						chat.sendMessage(msgTo);
-						String insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + msg;
-						if(intsertMsg(insertMsg, 1)){
-							try {
-								System.out.println("Message sent out successfully :" + msg);
-								//Message was successfully sent out. Cleat the textfield.
-								clearInputField();
-							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}else{
-							//TODO This part show be changed to a message box to inform user of instruction.
-							System.out.println("Message sent out failed.");
-						}
-					} catch (NotConnectedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					
-				}else{
-					//TODO This part show be changed to a message box to inform user of instruction.
-					System.out.println("The sending message cannot be empty.");
-				}
-				
+				sendMsg();
 			}
 		});
 		btnSend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/send.png")));
@@ -397,16 +378,100 @@ public class ChatFrame extends JFrame {
 		
 	}
 	
-	private static void initManager(){
+	/**
+	 * initialize the ChatManager
+	 * @param frame
+	 */
+	private static void initManager(JFrame frame){
 		if(LoginFrame.connection != null && SeverConnection.isConnectionValid(LoginFrame.connection)){
 			chatManager = SeverConnection.getChatManager(LoginFrame.connection);
-			chatManager.addChatListener(new LLJChatMessageListener(textPane, textMessage));
+			chatManager.addChatListener(new LLJChatMessageListener(textPane, textMessage, frame));
+			roster = Roster.getInstanceFor(LoginFrame.connection);
 		}
 	}
 	
+	/**
+	 * Create chat with user of userJID
+	 * @param userJID
+	 * @return
+	 */
 	public static Chat chatWith(String userJID){
 		Chat chat = chatManager.createChat(userJID+"@"+SeverConnection.xmppDomain);
 		return chat;
+	}
+	
+	/**
+	 * Initialize the friends tree.
+	 * @param tree
+	 * @param sp
+	 */
+	public static void initFriendTree(JTree tree, JScrollPane sp){
+		if(roster != null){
+			Collection<RosterEntry> entries = roster.getEntries();
+//			System.out.println("size="+entries.size());
+			FriendTreeNode root = new FriendTreeNode("Root1");
+			root.setNickname("Root2");
+			root.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons16/user.png")));
+			
+			for (int i = 0; i < 1; i++) {
+				FriendTreeNode child = new FriendTreeNode("My Friends");
+				child.setNickname("My Friends");
+				//Add my friends to the tree.
+				for (RosterEntry entry : entries) {
+					FriendTreeNode childj = new FriendTreeNode(entry.getName());
+					childj.setNickname(entry.getName());
+					childj.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons32/man.png")));
+					childj.setSignature("I am " + entry.getName());
+					child.addChild(childj);
+				}
+				root.addChild(child);
+			}
+			
+			DefaultTreeModel jMode = new DefaultTreeModel(root);
+			tree.setModel(jMode);
+			tree.setCellRenderer(new FriendTreeRender());
+			tree.setRootVisible(false);
+			tree.setToggleClickCount(1);//Expand the tree with 1 time click.
+			
+			sp.setViewportView(tree);
+		}else{
+			System.out.println("Get roster from connection errors.");
+		}
+	}
+	
+	/**
+	 * Send a message.
+	 */
+	public void sendMsg(){
+		String msg = textMessage.getText();
+		if(!StringUtils.isEmpty(msg)){
+			Message msgTo = new Message();
+			msgTo.setBody(msg);
+			try {
+				chat.sendMessage(msgTo);
+				String insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + msg;
+				if(intsertMsg(insertMsg, 1)){
+					try {
+						System.out.println("Message sent out successfully :" + msg);
+						//Message was successfully sent out. Cleat the textfield.
+						clearInputField();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}else{
+					//TODO This part show be changed to a message box to inform user of instruction.
+					System.out.println("Message sent out failed.");
+				}
+			} catch (NotConnectedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+		}else{
+			//TODO This part show be changed to a message box to inform user of instruction.
+			System.out.println("The sending message cannot be empty.");
+		}
 	}
 	
 	private static void addPopup(Component component, final JPopupMenu popup) {
@@ -436,6 +501,7 @@ public class ChatFrame extends JFrame {
 	public static boolean intsertMsg(String msg, int msgType) {
 		boolean result = false;
 		try {
+//			msg.replaceAll("\\r\\n", "\\r\\n\\t");
 			StyledDocument doc = textPane.getStyledDocument();
 			// Set font.
 			SimpleAttributeSet attr = new SimpleAttributeSet();
@@ -447,6 +513,8 @@ public class ChatFrame extends JFrame {
 			doc.insertString(doc.getLength(), msg + "\n", attr);
 			
 			result = true;
+			//Move to the top down.
+			textPane.selectAll();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -521,6 +589,18 @@ public class ChatFrame extends JFrame {
 	            (screenSize.height - compSize.height) / 2);  
 	}
 	
+	public static void sendShake(){
+		Message shakeMsg = new Message();
+		shakeMsg.setType(Message.Type.headline);
+		shakeMsg.setBody("Shake");
+		try {
+			chat.sendMessage(shakeMsg);
+		} catch (NotConnectedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Shake the chatting window.
 	 */
@@ -543,5 +623,27 @@ public class ChatFrame extends JFrame {
 			}
 		}
 	}
+	
+	//KeyListener interface
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// TODO Auto-generated method stub
+		if(e.getKeyCode() == KeyEvent.VK_ENTER && e.isControlDown()){
+			System.out.println("Ctrl+Enter pressed");
+			sendMsg();
+		}
+	}
 
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	//KeyListener interface
 }

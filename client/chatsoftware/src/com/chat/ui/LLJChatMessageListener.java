@@ -2,6 +2,7 @@ package com.chat.ui;
 
 import java.util.Date;
 
+import javax.swing.JFrame;
 import javax.swing.JTextPane;
 
 import org.jivesoftware.smack.chat.Chat;
@@ -15,10 +16,12 @@ import com.llj.util.DateUtil;
 public class LLJChatMessageListener implements ChatManagerListener {
 
 	private JTextPane textPane, textMessage;
+	private JFrame chatFrame;
 	
-	public LLJChatMessageListener(JTextPane textPane, JTextPane textMessage) {
+	public LLJChatMessageListener(JTextPane textPane, JTextPane textMessage, JFrame chatFrame) {
 		this.textPane = textPane;
 		this.textMessage = textMessage;
+		this.chatFrame = chatFrame;
 	}
 
 	@Override
@@ -29,16 +32,20 @@ public class LLJChatMessageListener implements ChatManagerListener {
 			@Override
 			public void processMessage(Chat chat, Message msg) {
 				// TODO Auto-generated method stub
+//				System.out.println("Message is : " + msg);
 				if(msg.getThread() != null){
 //					System.out.println("Receive thread message.");
 				}
 				if(msg.getBody() != null){
-					System.out.println("Message is : " + msg);
+//					System.out.println("Message is : " + msg);
 					String from = msg.getFrom();
 					from = from.split("@")[0];
 					String time = DateUtil.format3(new Date());
 					String message = from + "  " + time +"\n    " + msg.getBody();
 					ChatFrame.intsertMsg(message, 0);
+				}
+				if(msg.getType() == Message.Type.headline && msg.getBody().equals("Shake")){
+					shakeFrame(chatFrame);
 				}
 			}
 
@@ -49,6 +56,29 @@ public class LLJChatMessageListener implements ChatManagerListener {
 			}
 			
 		});
+	}
+	
+	/**
+	 * Shake the chatting window.
+	 */
+	public void shakeFrame(JFrame frame) {
+		int x = frame.getX();
+		int y = frame.getY();
+		for (int i = 0; i < 20; i++) {
+			if ((i & 1) == 0) {
+				x += 3;
+				y += 3;
+			} else {
+				x -= 3;
+				y -= 3;
+			}
+			frame.setLocation(x, y);
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+		}
 	}
 
 }
