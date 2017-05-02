@@ -36,7 +36,7 @@ public class LLJChatMessageListener implements ChatManagerListener {
 				if(msg.getThread() != null){
 //					System.out.println("Receive thread message.");
 				}
-				if(msg.getBody() != null && msg.getType() != Message.Type.headline && !msg.getBody().equals("Shake")){
+				if(msg.getBody() != null && msg.getSubject() == null && !msg.getBody().equals("Shake")){
 //					System.out.println("Message is : " + msg);
 					String from = msg.getFrom();
 					from = from.split("@")[0];
@@ -44,8 +44,15 @@ public class LLJChatMessageListener implements ChatManagerListener {
 					String message = from + "  " + time +"\n    " + msg.getBody();
 					ChatFrame.intsertMsg(message, 0);
 				}
-				if(msg.getType() == Message.Type.headline && msg.getBody().equals("Shake")){
+				if(msg.getSubject() != null && msg.getSubject().equals("Shake") && msg.getBody().equals("Shake")){
+					System.out.println("shake the frame");
 					shakeFrame(chatFrame);
+					
+					String from = msg.getFrom();
+					from = from.split("@")[0];
+					String time = DateUtil.format3(new Date());
+					String message = from + "  SHAKED your dialog at "+ time +". ";
+					ChatFrame.intsertMsg(message, 0);
 				}
 			}
 

@@ -620,10 +620,12 @@ public class ChatFrame extends JFrame implements KeyListener {
 	
 	public static void sendShake(){
 		Message shakeMsg = new Message();
-		shakeMsg.setType(Message.Type.headline);
+		shakeMsg.setSubject("Shake");
 		shakeMsg.setBody("Shake");
 		try {
 			chat.sendMessage(shakeMsg);
+			String insertMessage = "You shaked " + shakeMsg.getTo().toString().split("@")[0] +"'s dialog";
+			intsertMsg(insertMessage, 1);
 		} catch (NotConnectedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
