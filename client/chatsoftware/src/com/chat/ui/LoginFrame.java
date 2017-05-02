@@ -136,7 +136,8 @@ public class LoginFrame extends JFrame {
 				}else{
 					System.out.println("username is '"+username+"'");
 					System.out.println("password is '"+password+"'");
-					connection = SeverConnection.login("lgc", "111111");
+//					connection = SeverConnection.login("lgc", "111111");
+					connection = SeverConnection.login(username, "111111");
 					heartBeats = SeverConnection.heartBeats(connection);
 					if(connection.isConnected()){
 						if(connection.isAuthenticated()){
