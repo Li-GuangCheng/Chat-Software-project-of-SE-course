@@ -32,7 +32,7 @@ public class LoginFrame extends JFrame {
 	private JPanel contentPane;
 	private JTextField textUsername;
 	private JPasswordField textPassword;
-	private static String username;
+	public static String username;
 	private static String password;
 	public static AbstractXMPPConnection connection;
 	public static Thread heartBeats;

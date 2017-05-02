@@ -120,6 +120,9 @@ public class ChatFrame extends JFrame implements KeyListener {
 		panel_11.add(panel_13, BorderLayout.CENTER);
 		
 		JLabel nickName = new JLabel("My Name");
+		if(LoginFrame.username != null){
+			nickName.setText(LoginFrame.username);
+		}
 		panel_13.add(nickName);
 		
 		JButton btnSearch = new JButton("Search");
@@ -618,13 +621,17 @@ public class ChatFrame extends JFrame implements KeyListener {
 	            (screenSize.height - compSize.height) / 2);  
 	}
 	
+	/**
+	 * Send a Shake message to the user so that the user's frame can be shaked.
+	 */
 	public static void sendShake(){
 		Message shakeMsg = new Message();
 		shakeMsg.setSubject("Shake");
 		shakeMsg.setBody("Shake");
 		try {
 			chat.sendMessage(shakeMsg);
-			String insertMessage = "You shaked " + shakeMsg.getTo().toString().split("@")[0] +"'s dialog";
+			String time = DateUtil.format3(new Date());
+			String insertMessage = "You shaked " + shakeMsg.getTo().toString().split("@")[0] +"'s dialog at " + time +".";
 			intsertMsg(insertMessage, 1);
 		} catch (NotConnectedException e) {
 			// TODO Auto-generated catch block

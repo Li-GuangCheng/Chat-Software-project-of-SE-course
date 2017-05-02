@@ -33,9 +33,7 @@ public class LLJChatMessageListener implements ChatManagerListener {
 			public void processMessage(Chat chat, Message msg) {
 				// TODO Auto-generated method stub
 //				System.out.println("Message is : " + msg);
-				if(msg.getThread() != null){
-//					System.out.println("Receive thread message.");
-				}
+				//Process normal message.
 				if(msg.getBody() != null && msg.getSubject() == null && !msg.getBody().equals("Shake")){
 //					System.out.println("Message is : " + msg);
 					String from = msg.getFrom();
@@ -44,6 +42,7 @@ public class LLJChatMessageListener implements ChatManagerListener {
 					String message = from + "  " + time +"\n    " + msg.getBody();
 					ChatFrame.intsertMsg(message, 0);
 				}
+				//Process shaking window message.
 				if(msg.getSubject() != null && msg.getSubject().equals("Shake") && msg.getBody().equals("Shake")){
 					System.out.println("shake the frame");
 					shakeFrame(chatFrame);
