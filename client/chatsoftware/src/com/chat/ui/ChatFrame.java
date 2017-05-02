@@ -38,9 +38,12 @@ import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.jivesoftware.smack.SmackException.NotConnectedException;
@@ -60,6 +63,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 	//textPane is the record about the textfield. 
 	//textMessage is the input textfidld.
 	private static JTextPane textPane, textMessage;
+	private static JLabel lblChattingWith;
 	private static JDialog emojiDialog = new JDialog();;
 	private static boolean isEmojiOpen = false;
 	private static ChatManager chatManager = null;// ChatManager used to create Chat.
@@ -98,7 +102,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 		
 		//
 		initManager(ChatFrame.this);
-		chat = chatWith("lh");
+//		chat = chatWith("lh");
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(UIManager.getColor("Panel.background"));
@@ -176,6 +180,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 //		scrollPane_2.setViewportView(friendTree);
 		
 		initFriendTree(friendTree, scrollPane_2);
+		friendTree.addTreeSelectionListener(new FriendTreeSelectListener(friendTree));
 		
 		JPanel panel_1 = new JPanel();
 		contentPane.add(panel_1, BorderLayout.CENTER);
@@ -195,9 +200,9 @@ public class ChatFrame extends JFrame implements KeyListener {
 		panel_4.add(panel_14, BorderLayout.WEST);
 		panel_14.setLayout(new BorderLayout(0, 0));
 		
-		JLabel lblChattingWithXxxxx = new JLabel("   Chatting with Bob");
-		lblChattingWithXxxxx.setFont(new Font("Franklin Gothic Medium", Font.PLAIN, 19));
-		panel_14.add(lblChattingWithXxxxx, BorderLayout.CENTER);
+		lblChattingWith = new JLabel("   Chatting with Bob");
+		lblChattingWith.setFont(new Font("Franklin Gothic Medium", Font.PLAIN, 19));
+		panel_14.add(lblChattingWith, BorderLayout.CENTER);
 		
 		JPanel panel_15 = new JPanel();
 		panel_15.setPreferredSize(new Dimension(200, 0));
@@ -437,6 +442,30 @@ public class ChatFrame extends JFrame implements KeyListener {
 		}else{
 			System.out.println("Get roster from connection errors.");
 		}
+	}
+	
+	class FriendTreeSelectListener implements TreeSelectionListener{
+		
+		private JTree tree;
+		
+		public FriendTreeSelectListener(JTree tree){
+			this.tree = tree;
+		}
+		
+		@Override
+		public void valueChanged(TreeSelectionEvent arg0) {
+			// TODO Auto-generated method stub
+			FriendTreeNode node = (FriendTreeNode) tree.getLastSelectedPathComponent();
+            if(node.isLeaf()){
+            	System.out.print("Select ");
+            	System.err.println(node.getNickname());
+            	chat = chatWith(node.getNickname());
+            	textPane.setText("");
+            	lblChattingWith.setText("   Chatting with " + node.getNickname());
+                return;  
+            } 
+		}
+			
 	}
 	
 	/**
