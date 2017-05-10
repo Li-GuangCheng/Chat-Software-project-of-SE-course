@@ -16,6 +16,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 
@@ -43,16 +44,22 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
+import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.filetransfer.FileTransferListener;
+import org.jivesoftware.smackx.filetransfer.FileTransferManager;
+import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
+import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
+import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
 
 import com.llj.network.SeverConnection;
 import com.llj.util.DateUtil;
@@ -68,7 +75,10 @@ public class ChatFrame extends JFrame implements KeyListener {
 	private static boolean isEmojiOpen = false;
 	private static ChatManager chatManager = null;// ChatManager used to create Chat.
 	private static Roster roster = null;// Friends list
+	private static FileTransferManager fileTransferManager = null;
+	private static OutgoingFileTransfer fileTransfer = null;
 	private static Chat chat = null;
+	private static String toJID = "";// The selected person's name from the friend tree.
 
 	/**
 	 * Launch the application.
@@ -303,19 +313,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 		JButton btnFile = new JButton("");
 		btnFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JFileChooser jfc=new JFileChooser();
-				jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
-				jfc.showDialog(new JLabel(), "Choose");
-				jfc.setDialogTitle("Choose a file");
-				File file=jfc.getSelectedFile();
-				if(file != null) {
-					if(file.isDirectory()){
-						System.out.println("Folder:"+file.getAbsolutePath());
-					}else if(file.isFile()){
-						System.out.println("File:"+file.getAbsolutePath());
-					}
-					System.out.println(jfc.getSelectedFile().getName());
-				}
+				chooseFile();
 			}
 		});
 		btnFile.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/folder.png")));
@@ -395,6 +393,27 @@ public class ChatFrame extends JFrame implements KeyListener {
 			chatManager = SeverConnection.getChatManager(LoginFrame.connection);
 			chatManager.addChatListener(new LLJChatMessageListener(textPane, textMessage, frame));
 			roster = Roster.getInstanceFor(LoginFrame.connection);
+			fileTransferManager = FileTransferManager.getInstanceFor(LoginFrame.connection);
+			//Register the file receive listener.
+			fileTransferManager.addFileTransferListener(new FileTransferListener(){
+				@Override
+				public void fileTransferRequest(FileTransferRequest request) {
+					// TODO Auto-generated method stub
+					System.out.println("Incoming a file. " + request.getRequestor());
+					IncomingFileTransfer transfer = request.accept();
+					try {
+						transfer.recieveFile(new File("C:\\Users\\Admin\\Desktop\\"+request.getFileName()));
+					} catch (SmackException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	                System.out.println("File " + request.getFileName() + " Received Successfully");
+				}
+				
+			});
 		}
 	}
 	
@@ -426,6 +445,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 				child.setNickname("My Friends");
 				//Add my friends to the tree.
 				for (RosterEntry entry : entries) {
+					System.out.println(entry.getUser());
 					FriendTreeNode childj = new FriendTreeNode(entry.getName());
 					childj.setNickname(entry.getName());
 					childj.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons32/man.png")));
@@ -462,7 +482,14 @@ public class ChatFrame extends JFrame implements KeyListener {
             if(node.isLeaf()){
             	System.out.print("Select ");
             	System.err.println(node.getNickname());
+            	//change the chat with new UserJID
             	chat = chatWith(node.getNickname());
+            	//change the toJID
+            	toJID = node.getNickname();
+            	//initialize the fileTransfer
+            	fileTransfer = fileTransferManager
+        				.createOutgoingFileTransfer(toJID+"@"+SeverConnection.xmppDomain+"/Smack");
+            	//Empty the ChatRecord.
             	textPane.setText("");
             	lblChattingWith.setText("   Chatting with " + node.getNickname());
                 return;  
@@ -662,12 +689,49 @@ public class ChatFrame extends JFrame implements KeyListener {
 		}
 	}
 	
+	/**
+	 * Select a file.
+	 */
+	public static void chooseFile() {
+		JFileChooser jfc=new JFileChooser();
+		jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		jfc.showDialog(new JLabel(), "Choose");
+		jfc.setDialogTitle("Choose a file");
+		File file=jfc.getSelectedFile();
+		if(file != null) {
+			if(file.isDirectory()){
+				System.out.println("Folder:"+file.getAbsolutePath());
+			}else if(file.isFile()){
+				System.out.println("File:"+file.getAbsolutePath());
+				sendFile(file);
+			}
+			System.out.println(jfc.getSelectedFile().getName());
+		}
+	}
+	
+	/**
+	 * send a file to the user.
+	 * @param file
+	 */
+	public static void sendFile(File file){
+		try {
+			fileTransfer.sendFile(file, "Send");
+			
+			Thread.sleep(2000);
+			
+			System.out.println("Status :: " + fileTransfer.getStatus() + " Error :: " + fileTransfer.getError() + " Exception :: " + fileTransfer.getException());
+		} catch (SmackException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	//KeyListener interface
 	@Override
 	public void keyPressed(KeyEvent e) {
 		// TODO Auto-generated method stub
 		if(e.getKeyCode() == KeyEvent.VK_ENTER && e.isControlDown()){
-			System.out.println("Ctrl+Enter pressed");
+//			System.out.println("Ctrl+Enter pressed");
 			sendMsg();
 		}
 	}

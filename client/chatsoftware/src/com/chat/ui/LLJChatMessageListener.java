@@ -68,6 +68,8 @@ public class LLJChatMessageListener implements ChatManagerListener {
 	 * Shake the chatting window.
 	 */
 	public void shakeFrame(JFrame frame) {
+		frame.setState(JFrame.NORMAL);
+		frame.show();
 		int x = frame.getX();
 		int y = frame.getY();
 		for (int i = 0; i < 20; i++) {
