@@ -286,11 +286,7 @@ public class SeverConnection {
 		System.out.println("negotiator.isServiceEnabled(connection)="+negotiator.isServiceEnabled(connection));
 		System.err.println("isFullJID1="+XmppStringUtils.isFullJID("lh"));
 		System.err.println("isFullJID2="+XmppStringUtils.isFullJID("lh@"+xmppDomain +"/Smack"));
-		/**
-		 * If you are sending file to the Spark client, the last part of the FullJID have to be "/Spark".
-		 * If you are sending file to the Smack client, the last part of the FullJID have to be "/Smack".
-		 * Otherwise, the file sending function will fail.
-		 */
+		//The last part of the FullJID have to be "/Spark", otherwise the file sending function will fail.
 		OutgoingFileTransfer fileTransfer = manager.createOutgoingFileTransfer("lh@"+xmppDomain +"/Spark");
 		try {
 			fileTransfer.sendFile(new File("C:\\Users\\Admin\\Desktop\\2.txt"), "Send a file.");
