@@ -1,5 +1,6 @@
 package com.llj.network;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -23,6 +24,13 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.util.TLSUtils;
 import org.jivesoftware.smackx.chatstates.ChatState;
 import org.jivesoftware.smackx.chatstates.ChatStateListener;
+import org.jivesoftware.smackx.filetransfer.FileTransferListener;
+import org.jivesoftware.smackx.filetransfer.FileTransferManager;
+import org.jivesoftware.smackx.filetransfer.FileTransferNegotiator;
+import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
+import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
+import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
+import org.jxmpp.util.XmppStringUtils;
 
 public class SeverConnection {
 	public static String severDNS = "ec2-54-254-130-230.ap-southeast-1.compute.amazonaws.com";
@@ -248,6 +256,45 @@ public class SeverConnection {
 			chat.sendMessage(msg);
 			System.out.println("sent a message");
 		} catch (NotConnectedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//Send a file.
+		FileTransferManager manager = FileTransferManager.getInstanceFor(connection);
+		manager.addFileTransferListener(new FileTransferListener() {
+			
+			@Override
+			public void fileTransferRequest(FileTransferRequest request) {
+				// TODO Auto-generated method stub
+				System.out.println("Incoming a file." + request.getRequestor());
+				IncomingFileTransfer transfer = request.accept();
+				try {
+					transfer.recieveFile(new File("C:\\Users\\Admin\\Desktop\\"+request.getFileName()));
+				} catch (SmackException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+                System.out.println("File " + request.getFileName() + " Received Successfully");
+			}
+		});
+		System.out.println("FileTransferNegotiator.isServiceEnabled()="+FileTransferNegotiator.isServiceEnabled(connection));
+		FileTransferNegotiator negotiator = FileTransferNegotiator.getInstanceFor(connection);
+		System.out.println("negotiator.isServiceEnabled(connection)="+negotiator.isServiceEnabled(connection));
+		System.err.println("isFullJID1="+XmppStringUtils.isFullJID("lh"));
+		System.err.println("isFullJID2="+XmppStringUtils.isFullJID("lh@"+xmppDomain +"/Smack"));
+		//The last part of the FullJID have to be "/Spark", otherwise the file sending function will fail.
+		OutgoingFileTransfer fileTransfer = manager.createOutgoingFileTransfer("lh@"+xmppDomain +"/Spark");
+		try {
+			fileTransfer.sendFile(new File("C:\\Users\\Admin\\Desktop\\2.txt"), "Send a file.");
+			
+			Thread.sleep(2000);
+			
+			System.out.println("Status :: " + fileTransfer.getStatus() + " Error :: " + fileTransfer.getError() + " Exception :: " + fileTransfer.getException());
+		} catch (SmackException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
