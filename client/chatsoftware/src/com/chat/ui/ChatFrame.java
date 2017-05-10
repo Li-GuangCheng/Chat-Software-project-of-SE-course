@@ -15,6 +15,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -626,6 +628,35 @@ public class ChatFrame extends JFrame implements KeyListener {
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		emojiDialog.getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
+		emojiDialog.addWindowListener(new WindowListener() {
+			@Override
+			public void windowOpened(WindowEvent e) {}
+			
+			@Override
+			public void windowIconified(WindowEvent e) {}
+			
+			@Override
+			public void windowDeiconified(WindowEvent e) {}
+
+			@Override
+			public void windowClosing(WindowEvent e) {}
+			
+			@Override
+			public void windowClosed(WindowEvent e) {}
+			
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				//When the window is deactived, set isEmojiOpen to false.
+				isEmojiOpen = false;
+			}
+
+			@Override
+			public void windowActivated(WindowEvent e) {
+				//When the window is deactived, set isEmojiOpen to true.
+				isEmojiOpen = true;
+			}
+		});
+		
 		//Initialize the expressions.
 		JLabel[] emojis = new JLabel[36]; /*放表情*/
 		for(int i = 0; i<36; i++){
@@ -636,22 +667,22 @@ public class ChatFrame extends JFrame implements KeyListener {
 			emojis[i].setToolTipText("Expression_"+(i+1));
 			
 			emojis[i].addMouseListener(new MouseAdapter() {
+				//When choosing an expression
 				public void mouseClicked(MouseEvent e) {
 					if (e.getButton() == 1) {
-						// JLabel cubl = (JLabel)(e.getSource());
-						// ChatPic cupic = (ChatPic)(cubl.getIcon());
-						// owner.insertSendPic(cupic);
-						// cubl.setBorder(BorderFactory.createLineBorder(new
-						// Color(225,225,225), 1));
-						// getObj().dispose();
+						 JLabel cubl = (JLabel)(e.getSource());
+						 cubl.setBorder(BorderFactory.createLineBorder(new Color(225,225,225), 1));
+						 emojiDialog.setVisible(false);
 					}
 				}
 
+				//When moving the mouse on an expression
 				@Override
 				public void mouseEntered(MouseEvent e) {
 					((JLabel) e.getSource()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
 				}
 
+				//When moving the mouse out off an expression
 				@Override
 				public void mouseExited(MouseEvent e) {
 					((JLabel) e.getSource()).setBorder(BorderFactory.createLineBorder(new Color(225, 225, 225), 1));
