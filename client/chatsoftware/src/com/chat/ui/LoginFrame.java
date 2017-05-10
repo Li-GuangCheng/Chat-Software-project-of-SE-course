@@ -8,8 +8,6 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -29,7 +27,7 @@ import org.jivesoftware.smack.util.StringUtils;
 
 import com.llj.network.SeverConnection;
 
-public class LoginFrame extends JFrame implements KeyListener {
+public class LoginFrame extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField textUsername;
@@ -105,7 +103,6 @@ public class LoginFrame extends JFrame implements KeyListener {
 		panel_2.add(lblUsername);
 		
 		textUsername = new JTextField();
-		textUsername.addKeyListener(this);
 		panel_2.add(textUsername);
 		textUsername.setColumns(15);
 		
@@ -119,7 +116,6 @@ public class LoginFrame extends JFrame implements KeyListener {
 		
 		textPassword = new JPasswordField();
 		textPassword.setColumns(15);
-		textPassword.addKeyListener(this);
 		panel_3.add(textPassword);
 		
 		JPanel panel_4 = new JPanel();
@@ -133,7 +129,30 @@ public class LoginFrame extends JFrame implements KeyListener {
 		JButton btnLogin = new JButton("Login");
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				login();
+				username = textUsername.getText().trim();
+				password = new String(textPassword.getPassword());
+				if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password)){
+					JOptionPane.showMessageDialog(null, "Please input your username and password!", "Warnning", JOptionPane.WARNING_MESSAGE); 
+				}else{
+					System.out.println("username is '"+username+"'");
+					System.out.println("password is '"+password+"'");
+//					connection = SeverConnection.login("lgc", "111111");
+					connection = SeverConnection.login(username, "111111");
+					heartBeats = SeverConnection.heartBeats(connection);
+					if(connection.isConnected()){
+						if(connection.isAuthenticated()){
+							LoginFrame.this.setVisible(false);
+							System.out.println("Successfully login to the server.");
+							ChatFrame frame = new ChatFrame(LoginFrame.this);
+							ChatFrame.setLocationCenter(frame);
+							frame.setVisible(true);
+						}else{
+							JOptionPane.showMessageDialog(null, "Authentication failed!", "Warning", JOptionPane.WARNING_MESSAGE); 
+						}
+					}else{
+						JOptionPane.showMessageDialog(null, "Failed to connnect to server!", "Error", JOptionPane.ERROR_MESSAGE); 
+					}
+				}
 			}
 		});
 		btnLogin.setFont(UIManager.getFont("Button.font"));
@@ -145,13 +164,6 @@ public class LoginFrame extends JFrame implements KeyListener {
 		panel.setLayout(new BorderLayout(0, 0));
 		
 		JButton btnRegister = new JButton("  Register");
-		btnRegister.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				RegisterFrame frame = new RegisterFrame();
-				ChatFrame.setLocationCenter(frame);
-				frame.setVisible(true);
-			}
-		});
 		btnRegister.setFont(UIManager.getFont("Button.font"));
 		btnRegister.setForeground(new Color(51, 102, 204));
 		btnRegister.setBackground(c);
@@ -169,54 +181,6 @@ public class LoginFrame extends JFrame implements KeyListener {
 		
 		JLabel label_2 = new JLabel("     ");
 		panel.add(label_2, BorderLayout.NORTH);
-	}
-	
-	public void login() {
-		username = textUsername.getText().trim();
-		password = new String(textPassword.getPassword());
-		if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password)){
-			JOptionPane.showMessageDialog(null, "Please input your username and password!", "Warnning", JOptionPane.WARNING_MESSAGE); 
-		}else{
-			System.out.println("username is '"+username+"'");
-			System.out.println("password is '"+password+"'");
-//			connection = SeverConnection.login("lgc", "111111");
-			connection = SeverConnection.login(username, "111111");
-			heartBeats = SeverConnection.heartBeats(connection);
-			if(connection.isConnected()){
-				if(connection.isAuthenticated()){
-					LoginFrame.this.setVisible(false);
-					System.out.println("Successfully login to the server.");
-					ChatFrame frame = new ChatFrame(LoginFrame.this);
-					ChatFrame.setLocationCenter(frame);
-					frame.setVisible(true);
-				}else{
-					JOptionPane.showMessageDialog(null, "Authentication failed!", "Warning", JOptionPane.WARNING_MESSAGE); 
-				}
-			}else{
-				JOptionPane.showMessageDialog(null, "Failed to connnect to server!", "Error", JOptionPane.ERROR_MESSAGE); 
-			}
-		}
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-		if(e.getKeyCode() == KeyEvent.VK_ENTER){
-//			System.out.println("Enter pressed");
-			login();
-		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
