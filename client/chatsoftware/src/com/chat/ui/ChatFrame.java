@@ -445,7 +445,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 				child.setNickname("My Friends");
 				//Add my friends to the tree.
 				for (RosterEntry entry : entries) {
-					System.out.println(entry.getUser());
+//					System.out.println(entry.getUser());
 					FriendTreeNode childj = new FriendTreeNode(entry.getName());
 					childj.setNickname(entry.getName());
 					childj.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons32/man.png")));
@@ -496,6 +496,23 @@ public class ChatFrame extends JFrame implements KeyListener {
             } 
 		}
 			
+	}
+	
+	public static void createChatWhenMsgComing(String userBareJID) {
+		String currentUser = lblChattingWith.getText().toString();
+		currentUser = currentUser.substring("   Chatting with ".length(), currentUser.length());
+		if(!currentUser.equals(userBareJID)) {
+			//change the chat with new UserJID
+        	chat = chatWith(userBareJID);
+        	//change the toJID
+        	toJID = userBareJID;
+        	//initialize the fileTransfer
+        	fileTransfer = fileTransferManager
+    				.createOutgoingFileTransfer(toJID+"@"+SeverConnection.xmppDomain+"/Smack");
+        	//Empty the ChatRecord.
+        	textPane.setText("");
+        	lblChattingWith.setText("   Chatting with " + userBareJID);
+		}
 	}
 	
 	/**

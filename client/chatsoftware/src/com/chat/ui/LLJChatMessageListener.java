@@ -33,6 +33,7 @@ public class LLJChatMessageListener implements ChatManagerListener {
 			public void processMessage(Chat chat, Message msg) {
 				// TODO Auto-generated method stub
 //				System.out.println("Message is : " + msg);
+				ChatFrame.createChatWhenMsgComing(msg.getFrom().split("@")[0]);
 				//Process normal message.
 				if(msg.getBody() != null && msg.getSubject() == null && !msg.getBody().equals("Shake")){
 //					System.out.println("Message is : " + msg);
