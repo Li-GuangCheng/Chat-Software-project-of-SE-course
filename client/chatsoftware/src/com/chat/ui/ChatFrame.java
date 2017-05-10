@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -36,6 +37,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextPane;
 import javax.swing.JTree;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -48,7 +50,6 @@ import javax.swing.tree.DefaultTreeModel;
 
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.packet.Message;
@@ -621,9 +622,44 @@ public class ChatFrame extends JFrame implements KeyListener {
 		emojiDialog.setSize(400, 240);
 		emojiDialog.getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBackground(new Color(255, 250, 240));
-		contentPanel.setLayout(new BorderLayout());
+		contentPanel.setLayout(new GridLayout(5, 9));
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		emojiDialog.getContentPane().add(contentPanel, BorderLayout.CENTER);
+		
+		//Initialize the expressions.
+		JLabel[] emojis = new JLabel[36]; /*放表情*/
+		for(int i = 0; i<36; i++){
+			emojis[i] = new JLabel();
+			emojis[i].setIcon(new ImageIcon(ChatFrame.class.getResource("/ayemoji/Expression_"+(i+1)+".png")));
+			emojis[i].setHorizontalAlignment(SwingConstants.CENTER);
+			emojis[i].setBorder(BorderFactory.createLineBorder(new Color(225,225,225), 1));
+			emojis[i].setToolTipText("Expression_"+(i+1));
+			
+			emojis[i].addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					if (e.getButton() == 1) {
+						// JLabel cubl = (JLabel)(e.getSource());
+						// ChatPic cupic = (ChatPic)(cubl.getIcon());
+						// owner.insertSendPic(cupic);
+						// cubl.setBorder(BorderFactory.createLineBorder(new
+						// Color(225,225,225), 1));
+						// getObj().dispose();
+					}
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					((JLabel) e.getSource()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
+				}
+
+				@Override
+				public void mouseExited(MouseEvent e) {
+					((JLabel) e.getSource()).setBorder(BorderFactory.createLineBorder(new Color(225, 225, 225), 1));
+				}
+			});
+			
+			contentPanel.add(emojis[i]);
+		}
 		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setOpaque(false);
