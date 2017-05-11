@@ -82,6 +82,8 @@ public class ChatFrame extends JFrame implements KeyListener {
 	private static OutgoingFileTransfer fileTransfer = null;
 	private static Chat chat = null;
 	private static String toJID = "";// The selected person's name from the friend tree.
+	private static JTree friendTree;
+	private static JScrollPane scrollPane_2;
 
 	/**
 	 * Launch the application.
@@ -146,55 +148,10 @@ public class ChatFrame extends JFrame implements KeyListener {
 		headIcon.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons32/head.png")));
 		panel_11.add(headIcon, BorderLayout.WEST);
 		
-		JScrollPane scrollPane_2 = new JScrollPane();
+		//Friend Tree
+		scrollPane_2 = new JScrollPane();
 		panel.add(scrollPane_2, BorderLayout.CENTER);
-		
-		JTree friendTree = new JTree();
-//		friendTree.setModel(new DefaultTreeModel(
-//			new DefaultMutableTreeNode("MyFriends") {
-//				{
-//					DefaultMutableTreeNode node_1;
-//					node_1 = new DefaultMutableTreeNode("Group1");
-//						node_1.add(new DefaultMutableTreeNode("friend1"));
-//						node_1.add(new DefaultMutableTreeNode("friend2"));
-//						node_1.add(new DefaultMutableTreeNode("friend3"));
-//						node_1.add(new DefaultMutableTreeNode("friend4"));
-//					add(node_1);
-//					node_1 = new DefaultMutableTreeNode("Group2");
-//						node_1.add(new DefaultMutableTreeNode("friend1"));
-//						node_1.add(new DefaultMutableTreeNode("friend2"));
-//						node_1.add(new DefaultMutableTreeNode("friend3"));
-//						node_1.add(new DefaultMutableTreeNode("friend4"));
-//					add(node_1);
-//					node_1 = new DefaultMutableTreeNode("Group3");
-//						node_1.add(new DefaultMutableTreeNode("friend1"));
-//						node_1.add(new DefaultMutableTreeNode("friend2"));
-//						node_1.add(new DefaultMutableTreeNode("friend3"));
-//						node_1.add(new DefaultMutableTreeNode("friend4"));
-//					add(node_1);
-//					node_1 = new DefaultMutableTreeNode("Group4");
-//						node_1.add(new DefaultMutableTreeNode("friend1"));
-//						node_1.add(new DefaultMutableTreeNode("friend2"));
-//						node_1.add(new DefaultMutableTreeNode("friend3"));
-//						node_1.add(new DefaultMutableTreeNode("friend4"));
-//					add(node_1);
-//					node_1 = new DefaultMutableTreeNode("Group5");
-//						node_1.add(new DefaultMutableTreeNode("friend1"));
-//						node_1.add(new DefaultMutableTreeNode("friend2"));
-//						node_1.add(new DefaultMutableTreeNode("friend3"));
-//						node_1.add(new DefaultMutableTreeNode("friend4"));
-//					add(node_1);
-//					node_1 = new DefaultMutableTreeNode("Group6");
-//						node_1.add(new DefaultMutableTreeNode("friend1"));
-//						node_1.add(new DefaultMutableTreeNode("friend2"));
-//						node_1.add(new DefaultMutableTreeNode("friend3"));
-//						node_1.add(new DefaultMutableTreeNode("friend4"));
-//					add(node_1);
-//				}
-//			}
-//		));
-//		scrollPane_2.setViewportView(friendTree);
-		
+		friendTree = new JTree();
 		initFriendTree(friendTree, scrollPane_2);
 		friendTree.addTreeSelectionListener(new FriendTreeSelectListener(friendTree));
 		
@@ -239,6 +196,16 @@ public class ChatFrame extends JFrame implements KeyListener {
 		
 		JMenuItem mntmAddFriend = new JMenuItem("Add Friend");
 		mntmAddFriend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/friend_add.png")));
+		mntmAddFriend.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				FriendAddDialog frame = new FriendAddDialog(LoginFrame.connection);
+				ChatFrame.setLocationCenter(frame);
+				frame.setVisible(true);
+			}
+		});
 		menu.add(mntmAddFriend);
 		
 		JMenuItem menuItemSetting = new JMenuItem("Settings...");
@@ -453,6 +420,13 @@ public class ChatFrame extends JFrame implements KeyListener {
 					childj.setNickname(entry.getName());
 					childj.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons32/man.png")));
 					childj.setSignature("I am " + entry.getName());
+					if(!entry.getGroups().isEmpty()){
+//						System.out.println(entry.getGroups().get(0).getName());
+						childj.setGroup(entry.getGroups().get(0).getName());
+					}else{
+						//Default group is Blue.
+						childj.setGroup("Blue");
+					}
 					child.addChild(childj);
 				}
 				root.addChild(child);
@@ -470,7 +444,62 @@ public class ChatFrame extends JFrame implements KeyListener {
 		}
 	}
 	
-	class FriendTreeSelectListener implements TreeSelectionListener{
+	public static void refreshFriendTree() {
+		System.out.println("refreshFriendTree() called.");
+		scrollPane_2.remove(friendTree);
+		if(roster != null){
+			Collection<RosterEntry> entries = roster.getEntries();
+			friendTree = new JTree();
+			friendTree.removeAll();
+//			System.out.println("size="+entries.size());
+			FriendTreeNode root = new FriendTreeNode("Root1");
+			root.setNickname("Root2");
+			root.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons16/user.png")));
+			
+			for (int i = 0; i < 1; i++) {
+				FriendTreeNode child = new FriendTreeNode("My Friends");
+				child.setNickname("My Friends");
+				//Add my friends to the tree.
+				for (RosterEntry entry : entries) {
+//					System.err.println(entry.getUser());
+					FriendTreeNode childj = new FriendTreeNode(entry.getName());
+					childj.setNickname(entry.getName());
+					childj.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons32/man.png")));
+					childj.setSignature("I am " + entry.getName());
+					if(!entry.getGroups().isEmpty()){
+						childj.setGroup(entry.getGroups().get(0).getName());
+					}else{
+						//Default group is Blue.
+						childj.setGroup("Blue");
+					}
+					child.addChild(childj);
+				}
+				root.addChild(child);
+			}
+			
+			DefaultTreeModel jMode = new DefaultTreeModel(root);
+			jMode.reload();
+			friendTree.setModel(jMode);
+			friendTree.updateUI();
+			friendTree.setCellRenderer(new FriendTreeRender());
+			friendTree.addTreeSelectionListener(new TreeSelectionListener() {
+				
+				@Override
+				public void valueChanged(TreeSelectionEvent e) {
+					// TODO Auto-generated method stub
+					treeItemSelection(friendTree); 
+				}
+			});
+			friendTree.setRootVisible(false);
+			friendTree.setToggleClickCount(1);//Expand the tree with 1 time click.
+			scrollPane_2.setViewportView(friendTree);
+			System.out.println("Friend Tree reloaded.");
+		}else{
+			System.out.println("Get roster from connection errors.");
+		}
+	}
+	
+	final class FriendTreeSelectListener implements TreeSelectionListener{
 		
 		private JTree tree;
 		
@@ -481,24 +510,28 @@ public class ChatFrame extends JFrame implements KeyListener {
 		@Override
 		public void valueChanged(TreeSelectionEvent arg0) {
 			// TODO Auto-generated method stub
-			FriendTreeNode node = (FriendTreeNode) tree.getLastSelectedPathComponent();
-            if(node.isLeaf()){
-            	System.out.print("Select ");
-            	System.err.println(node.getNickname());
-            	//change the chat with new UserJID
-            	chat = chatWith(node.getNickname());
-            	//change the toJID
-            	toJID = node.getNickname();
-            	//initialize the fileTransfer
-            	fileTransfer = fileTransferManager
-        				.createOutgoingFileTransfer(toJID+"@"+SeverConnection.xmppDomain+"/Smack");
-            	//Empty the ChatRecord.
-            	textPane.setText("");
-            	lblChattingWith.setText("   Chatting with " + node.getNickname());
-                return;  
-            } 
+			treeItemSelection(tree);
+			return;
 		}
-			
+	}
+	
+	public static void treeItemSelection(JTree tree){
+		FriendTreeNode node = (FriendTreeNode) tree.getLastSelectedPathComponent();
+        if(node.isLeaf()){
+        	System.out.print("Select ");
+        	System.err.println(node.getNickname());
+        	//change the chat with new UserJID
+        	chat = chatWith(node.getNickname());
+        	//change the toJID
+        	toJID = node.getNickname();
+        	//initialize the fileTransfer
+        	fileTransfer = fileTransferManager
+    				.createOutgoingFileTransfer(toJID+"@"+SeverConnection.xmppDomain+"/Smack");
+        	//Empty the ChatRecord.
+        	textPane.setText("");
+        	lblChattingWith.setText("   Chatting with " + node.getNickname());
+            return;  
+        } 
 	}
 	
 	public static void createChatWhenMsgComing(String userBareJID) {

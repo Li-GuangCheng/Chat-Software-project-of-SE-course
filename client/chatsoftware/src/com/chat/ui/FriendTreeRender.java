@@ -20,10 +20,8 @@ public class FriendTreeRender extends JLabel implements TreeCellRenderer {
 			boolean leaf, int row, boolean hasFocus) {
 		FriendTreeNode f = (FriendTreeNode) value;
 		if (leaf && f.getParent() != tree.getModel().getRoot()) {
-			/******* 设置JLable的文字 ******/
-			String text = "<html>" + f.getNickname() + "<br/><font color='red'>" + f.getSignature() + "</font> <html/>";
+			String text = "<html>" + f.getNickname() + "<br/><font color='"+f.getGroup().toLowerCase()+"'>●</font> <html/>";
 			setText(text);// 设置JLable的文字
-			/******* 设置JLable的图片 *****/
 			// 得到此图标的 Image,然后创建此图像的缩放版本。
 			Image img = f.getImg().getImage().getScaledInstance(32, 32, Image.SCALE_DEFAULT);
 			setIcon(new ImageIcon(img));// 设置JLable的图片
@@ -38,6 +36,7 @@ public class FriendTreeRender extends JLabel implements TreeCellRenderer {
 				setIcon(arrowDown);
 			else
 				setIcon(arrowRight);// 设置JLable的图片
+			
 		}
 
 		return this;

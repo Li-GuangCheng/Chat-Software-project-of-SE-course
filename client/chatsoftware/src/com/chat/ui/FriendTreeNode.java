@@ -12,6 +12,7 @@ public class FriendTreeNode implements TreeNode {
 	private ImageIcon img;// 节点存放图片
 	private String nickname;// 第一行文字（显示名字）
 	private String signature;// 第二行文字（显示签名）
+	private String group;// 分组
 
 	private ArrayList<TreeNode> children;// 孩子节点
 	private TreeNode parent;// 父亲节点
@@ -89,6 +90,14 @@ public class FriendTreeNode implements TreeNode {
 	 */
 	public String getSignature() {
 		return signature;
+	}
+	
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
 	}
 
 	/**
