@@ -194,8 +194,9 @@ public class ChatFrame extends JFrame implements KeyListener {
 		menu.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/Category.png")));
 		menuBar.add(menu);
 		
+		//Add a friend
 		JMenuItem mntmAddFriend = new JMenuItem("Add Friend");
-		mntmAddFriend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/friend_add.png")));
+		mntmAddFriend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/add-user.png")));
 		mntmAddFriend.addActionListener(new ActionListener() {
 			
 			@Override
@@ -207,6 +208,21 @@ public class ChatFrame extends JFrame implements KeyListener {
 			}
 		});
 		menu.add(mntmAddFriend);
+		
+		//Delete Friends
+		JMenuItem mntmDeleteFriend = new JMenuItem("Delete Friend");
+		mntmDeleteFriend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/remove_user.png")));
+		mntmDeleteFriend.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				FriendDeleteDialog frame = new FriendDeleteDialog(LoginFrame.connection);
+				ChatFrame.setLocationCenter(frame);
+				frame.setVisible(true);
+			}
+		});
+		menu.add(mntmDeleteFriend);
 		
 		JMenuItem menuItemSetting = new JMenuItem("Settings...");
 		menuItemSetting.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/set.png")));

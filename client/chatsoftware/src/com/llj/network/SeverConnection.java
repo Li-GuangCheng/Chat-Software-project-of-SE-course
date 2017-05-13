@@ -6,6 +6,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 
+import javax.swing.JOptionPane;
+
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SmackException;
@@ -26,6 +28,7 @@ import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.parsing.ExceptionLoggingCallback;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
+import org.jivesoftware.smack.roster.packet.RosterPacket;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.util.TLSUtils;
@@ -196,22 +199,29 @@ public class SeverConnection {
 //					System.out.println("processPacket: " + stanza.toXML());
 					Roster roster = Roster.getInstanceFor(connection);
 					if(!stanza.getFrom().split("@")[0].equals(stanza.getTo().split("@")[0]) && ((Presence)stanza).getType() == Presence.Type.subscribe){
-						System.out.println(stanza.toXML());
-						FriendRequestDialog frDialog = new FriendRequestDialog(connection, stanza);
-						ChatFrame.setLocationCenter(frDialog);
-						frDialog.setVisible(true);
+//						System.out.println(stanza.toXML());
+						RosterEntry entry = roster.getEntry(stanza.getFrom());
+						if(entry != null && entry.getType().name().equals("to")){
+							System.out.println(""+entry.getUser()+":entry.getType()=" + entry.getType().name());
+							JOptionPane.showMessageDialog(null, entry.getUser().split("@")[0]+" has accepted your request. You two are friends now.", "Tip", JOptionPane.PLAIN_MESSAGE); 
+						}else{
+							FriendRequestDialog frDialog = new FriendRequestDialog(connection, stanza);
+							ChatFrame.setLocationCenter(frDialog);
+							frDialog.setVisible(true);
+						}
 					}
 					//When receiving a request of deleting a friend, send a a request of deleting a friend to him/her too.
 					if(!stanza.getFrom().split("@")[0].equals(stanza.getTo().split("@")[0]) && ((Presence)stanza).getType() == Presence.Type.unsubscribe){
-						Presence p = new Presence(Presence.Type.unsubscribe);
-						p.setTo(stanza.getFrom());
-						connection.sendStanza(p);
-						System.err.println("Send deleting a friend:" + stanza.getFrom());
 						if(roster != null) {
 							RosterEntry entry = roster.getEntry(stanza.getFrom());
 							try {
-								if(entry != null)
+								if(entry != null){
+									Presence p = new Presence(Presence.Type.unsubscribe);
+									p.setTo(stanza.getFrom());
+									connection.sendStanza(p);
+									System.err.println("Send deleting a friend:" + stanza.getFrom());
 									roster.removeEntry(entry);
+								}
 								System.err.println("Remove " + stanza.getFrom() + " from the roster");
 							} catch (NotLoggedInException e) {
 								// TODO Auto-generated catch block
