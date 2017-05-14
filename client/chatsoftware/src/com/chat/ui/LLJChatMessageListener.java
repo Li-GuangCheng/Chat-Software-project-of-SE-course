@@ -40,8 +40,9 @@ public class LLJChatMessageListener implements ChatManagerListener {
 					String from = msg.getFrom();
 					from = from.split("@")[0];
 					String time = DateUtil.format3(new Date());
-					String message = from + "  " + time +"\n    " + msg.getBody();
-					ChatFrame.intsertMsg(message, 0);
+					String userTime = from + "  " + time +"\n    ";
+					String message = msg.getBody();
+					ChatFrame.intsertMsg(userTime, message, 0);
 				}
 				//Process shaking window message.
 				if(msg.getSubject() != null && msg.getSubject().equals("Shake") && msg.getBody().equals("Shake")){
@@ -52,7 +53,7 @@ public class LLJChatMessageListener implements ChatManagerListener {
 					from = from.split("@")[0];
 					String time = DateUtil.format3(new Date());
 					String message = from + "  SHAKED your dialog at "+ time +". ";
-					ChatFrame.intsertMsg(message, 0);
+					ChatFrame.intsertMsg(null, message, 0);
 				}
 				//Process receiving an icon.
 				if(msg.getSubject() != null && msg.getSubject().equals("Facial")){

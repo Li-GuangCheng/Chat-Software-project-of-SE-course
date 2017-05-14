@@ -57,5 +57,7 @@
 	<classpathentry kind="lib" path="smack4.1.9/xpp3-1.1.4c.jar"/>
 	<classpathentry kind="lib" path="smack4.1.9/xstream-1.2.2.jar"/>
 	<classpathentry kind="lib" path="libs/fastjson-1.1.28.jar"/>
+	<classpathentry kind="lib" path="libs/json-jena-1.0.jar"/>
+	<classpathentry kind="lib" path="libs/Msc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

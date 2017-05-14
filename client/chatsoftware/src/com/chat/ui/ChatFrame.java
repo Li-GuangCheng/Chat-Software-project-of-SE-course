@@ -71,6 +71,11 @@ import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baidu.translate.demo.TransApi;
+import com.iflytek.cloud.speech.SpeechConstant;
+import com.iflytek.cloud.speech.SpeechError;
+import com.iflytek.cloud.speech.SpeechSynthesizer;
+import com.iflytek.cloud.speech.SpeechUtility;
+import com.iflytek.cloud.speech.SynthesizerListener;
 import com.llj.network.SeverConnection;
 import com.llj.util.DateUtil;
 
@@ -96,8 +101,9 @@ public class ChatFrame extends JFrame implements KeyListener {
 	private static String toJID = "";// The selected person's name from the friend tree.
 	private static JTree friendTree;
 	private static JScrollPane scrollPane_2;
-	private static JComboBox comboLanguage;
-	private static JCheckBox chckbxTranslate;
+	private static JComboBox comboLanguage;//Language combobox
+	private static JCheckBox chckbxTranslate;//Translate checkbox
+	private static String personVoice = "xiaoyan";// Default using xiaoyan's voice.
 
 	/**
 	 * Launch the application.
@@ -129,7 +135,8 @@ public class ChatFrame extends JFrame implements KeyListener {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 		
-		//
+		SpeechUtility.createUtility( SpeechConstant.APPID +"=59186de5");
+		
 		initManager(ChatFrame.this);
 //		chat = chatWith("lh");
 		
@@ -238,9 +245,37 @@ public class ChatFrame extends JFrame implements KeyListener {
 		});
 		menu.add(mntmDeleteFriend);
 		
-		JMenuItem menuItemSetting = new JMenuItem("Settings...");
-		menuItemSetting.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/set.png")));
-		menu.add(menuItemSetting);
+		JMenu mnSettings = new JMenu("Settings...");
+		mnSettings.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/set.png")));
+		menu.add(mnSettings);
+		
+		JMenuItem menuItem = new JMenuItem("普通话中/英-青年女声(小燕)");
+		menuItem.addActionListener(new VoiceSelectionListener());
+		mnSettings.add(menuItem);
+		
+		JMenuItem mntmNewMenuItem = new JMenuItem("普通话中/英-青年男声(小宇)");
+		mntmNewMenuItem.addActionListener(new VoiceSelectionListener());
+		mnSettings.add(mntmNewMenuItem);
+		
+		JMenuItem menuItem_4 = new JMenuItem("普通话-童年男声(小新)");
+		menuItem_4.addActionListener(new VoiceSelectionListener());
+		mnSettings.add(menuItem_4);
+		
+		JMenuItem menuItem_5 = new JMenuItem("普通话-童年女声(楠楠)");
+		menuItem_5.addActionListener(new VoiceSelectionListener());
+		mnSettings.add(menuItem_5);
+		
+		JMenuItem menuItem_1 = new JMenuItem("四川话-青年女生(小蓉)");
+		menuItem_1.addActionListener(new VoiceSelectionListener());
+		mnSettings.add(menuItem_1);
+		
+		JMenuItem menuItem_2 = new JMenuItem("东北话-青年女生(小芸)");
+		menuItem_2.addActionListener(new VoiceSelectionListener());
+		mnSettings.add(menuItem_2);
+		
+		JMenuItem menuItem_3 = new JMenuItem("河南话-青年男生(小坤)");
+		menuItem_3.addActionListener(new VoiceSelectionListener());
+		mnSettings.add(menuItem_3);
 		
 		JMenuItem menuItemAbout = new JMenuItem("About");
 		menuItemAbout.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/info.png")));
@@ -619,14 +654,17 @@ public class ChatFrame extends JFrame implements KeyListener {
 			msgTo.setBody(msg);
 			try {
 				chat.sendMessage(msgTo);
-				String insertMsg = "";
+				String userTime = "";
+				String message = "";
 				if(translateRst != null){
 //					insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + translateRst.getString("src") + "("+translateRst.getString("dst")+")";
-					insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + translateRst.getString("src");
+					userTime = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    ";
+					message = translateRst.getString("src");
 				}else{
-					insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + msg;
+					userTime = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    ";
+					message = msg;
 				}
-				if(intsertMsg(insertMsg, 1)){
+				if(intsertMsg(userTime, message, 1)){
 					try {
 						System.out.println("Message sent out successfully :" + msg);
 						//Message was successfully sent out. Cleat the textfield.
@@ -699,7 +737,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 	 * 		msgType=0 means from, msgType=1 means to, msgType=xxxx...TBD
 	 * @return whether the operation is success.
 	 */
-	public static boolean intsertMsg(String msg, int msgType) {
+	public static boolean intsertMsg(String userTime, String msg, int msgType) {
 		boolean result = false;
 		try {
 //			msg.replaceAll("\\r\\n", "\\r\\n\\t");
@@ -710,8 +748,33 @@ public class ChatFrame extends JFrame implements KeyListener {
 				StyleConstants.setForeground(attr,Color.red);
 			if(msgType == 1)
 				StyleConstants.setForeground(attr,Color.BLUE);
-			// insert String to the ChatArea.
-			doc.insertString(doc.getLength(), msg + "\n", attr);
+			// insert the userTime String first
+			if(userTime != null){
+				doc.insertString(doc.getLength(), userTime, attr);
+			}
+			doc.insertString(doc.getLength(), msg + "  ", attr);
+			
+			JButton btnVoice = new JButton();
+			btnVoice.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/voice.png")));
+			btnVoice.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+//					System.out.println("play the sound");
+					SpeechSynthesizer mTts= SpeechSynthesizer.createSynthesizer();
+					mTts.setParameter(SpeechConstant.VOICE_NAME, personVoice);//设置发音人
+					mTts.setParameter(SpeechConstant.SPEED, "50");//设置语速
+					mTts.setParameter(SpeechConstant.VOLUME, "80");//设置音量，范围0~100
+					
+					mTts.startSpeaking(msg, mSynListener);
+				}
+			});
+			textPane.setCaretPosition(doc.getLength());
+			if(userTime != null){
+				textPane.insertComponent(btnVoice);
+			}
+			
+			doc.insertString(doc.getLength(), "\n", attr);// Insert a new line.
 			
 			result = true;
 			//Move to the top down.
@@ -806,8 +869,8 @@ public class ChatFrame extends JFrame implements KeyListener {
 					// TODO Auto-generated method stub
 					JFileChooser jfc=new JFileChooser();
 					jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					jfc.showDialog(new JLabel(), "Choose");
-					jfc.setDialogTitle("Choose a Directory");
+					jfc.showDialog(new JLabel(), "Save");
+					jfc.setDialogTitle("Save to a Directory");
 					File file=jfc.getSelectedFile();
 					if(file != null) {
 						if(file.isDirectory()){
@@ -1068,7 +1131,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 			chat.sendMessage(shakeMsg);
 			String time = DateUtil.format3(new Date());
 			String insertMessage = "You shaked " + shakeMsg.getTo().toString().split("@")[0] +"'s dialog at " + time +".";
-			intsertMsg(insertMessage, 1);
+			intsertMsg(null, insertMessage, 1);
 		} catch (NotConnectedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1104,7 +1167,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 	public static void chooseFile() {
 		JFileChooser jfc=new JFileChooser();
 		jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		jfc.showDialog(new JLabel(), "Choose");
+		jfc.showDialog(new JLabel(), "Choose a file");
 		jfc.setDialogTitle("Choose a file");
 		File file=jfc.getSelectedFile();
 		if(file != null) {
@@ -1136,6 +1199,60 @@ public class ChatFrame extends JFrame implements KeyListener {
 			e.printStackTrace();
 		}
 	}
+	
+	class VoiceSelectionListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			String selectedVoice = e.getActionCommand();
+			if(selectedVoice.equals("通话中/英-青年女声(小燕)")){
+				personVoice = "xiaoyan";
+			}
+			if(selectedVoice.equals("普通话中/英-青年男声(小宇)")){
+				personVoice = "xiaoyu";
+			}
+			if(selectedVoice.equals("普通话-童年男声(小新)")){
+				personVoice = "vixx";
+			}
+			if(selectedVoice.equals("普通话-童年女声(楠楠)")){
+				personVoice = "vinn";
+			}
+			if(selectedVoice.equals("四川话-青年女生(小蓉)")){
+				personVoice = "vixr";
+			}
+			if(selectedVoice.equals("东北话-青年女生(小芸)")){
+				personVoice = "vixyun";
+			}
+			if(selectedVoice.equals("河南话-青年男生(小坤)")){
+				personVoice = "vixk";
+			}
+		}
+	}
+	
+	//合成监听器
+	private static SynthesizerListener mSynListener = new SynthesizerListener(){
+	    //会话结束回调接口，没有错误时，error为null
+	    public void onCompleted(SpeechError error) {}
+	    //缓冲进度回调
+	    //percent为缓冲进度0~100，beginPos为缓冲音频在文本中开始位置，endPos表示缓冲音频在文本中结束位置，info为附加信息。
+	    public void onBufferProgress(int percent, int beginPos, int endPos, String info) {}
+	    //开始播放
+	    public void onSpeakBegin() {}
+	    //暂停播放
+	    public void onSpeakPaused() {}
+	    //播放进度回调
+	    //percent为播放进度0~100,beginPos为播放音频在文本中开始位置，endPos表示播放音频在文本中结束位置.
+	    public void onSpeakProgress(int percent, int beginPos, int endPos) {}
+	    //恢复播放回调接口
+	    public void onSpeakResumed() {}
+		@Override
+		public void onEvent(int arg0, int arg1, int arg2, int arg3, Object arg4, Object arg5) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
+	
 	
 	//KeyListener interface
 	@Override
