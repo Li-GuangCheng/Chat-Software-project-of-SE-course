@@ -3,11 +3,13 @@ package com.chat.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,6 +21,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Date;
 
@@ -78,6 +82,9 @@ import com.iflytek.cloud.speech.SpeechUtility;
 import com.iflytek.cloud.speech.SynthesizerListener;
 import com.llj.network.SeverConnection;
 import com.llj.util.DateUtil;
+import com.llj.util.RandomUtil;
+
+import llj.testcode.ScreenCapture;
 
 public class ChatFrame extends JFrame implements KeyListener {
 
@@ -269,6 +276,14 @@ public class ChatFrame extends JFrame implements KeyListener {
 		menuItem_1.addActionListener(new VoiceSelectionListener());
 		mnSettings.add(menuItem_1);
 		
+		JMenuItem menuItem_6 = new JMenuItem("粤语-青年男声(大龙)");
+		menuItem_6.addActionListener(new VoiceSelectionListener());
+		mnSettings.add(menuItem_6);
+		
+		JMenuItem menuItem_7 = new JMenuItem("粤语-青年女声(小梅)");
+		menuItem_7.addActionListener(new VoiceSelectionListener());
+		mnSettings.add(menuItem_7);
+		
 		JMenuItem menuItem_2 = new JMenuItem("东北话-青年女生(小芸)");
 		menuItem_2.addActionListener(new VoiceSelectionListener());
 		mnSettings.add(menuItem_2);
@@ -331,9 +346,9 @@ public class ChatFrame extends JFrame implements KeyListener {
 		panel_8.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_2 = new JPanel();
-		panel_2.setPreferredSize(new Dimension(200, 0));
+		panel_2.setPreferredSize(new Dimension(160, 0));
 		panel_8.add(panel_2, BorderLayout.WEST);
-		panel_2.setLayout(new GridLayout(1, 5, 0, 0));
+		panel_2.setLayout(new GridLayout(1, 4, 0, 0));
 		
 		JButton btnFace = new JButton("");
 		emojiDialog();
@@ -365,6 +380,41 @@ public class ChatFrame extends JFrame implements KeyListener {
 		panel_2.add(btnShake);
 		
 		JButton btnCapture = new JButton("");
+		btnCapture.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				File picPath = new File("C:/temp");
+		        if(!picPath.exists()){
+		        	picPath.mkdir();
+		        }
+		        try {
+		        	String fileName = DateUtil.format4(new Date()) + RandomUtil.generateString(4);
+					File tempFile = new File("C:/temp", fileName+".png");  
+					ScreenCapture capture = ScreenCapture.getInstance();  
+					capture.captureImage();  
+					JFrame frame = new JFrame();  
+					JPanel panel = new JPanel();  
+					panel.setLayout(new BorderLayout());  
+					JLabel imagebox = new JLabel();  
+					panel.add(BorderLayout.CENTER, imagebox);  
+					imagebox.setIcon(capture.getPickedIcon());  
+					capture.saveToFile(tempFile);  
+					capture.captureImage();  
+					imagebox.setIcon(capture.getPickedIcon());  
+					frame.setContentPane(panel);  
+					frame.setSize(400, 300);  
+					frame.show();
+					
+					receiveFile(null, 0, tempFile.getName());
+					sendFile(tempFile);
+				} catch (HeadlessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}  
+			}
+		});
 		btnCapture.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/cut.png")));
 		panel_2.add(btnCapture);
 		
@@ -375,7 +425,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 			}
 		});
 		button.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/font.png")));
-		panel_2.add(button);
+//		panel_2.add(button);
 		
 		JPanel panel_7 = new JPanel();
 		panel_7.setPreferredSize(new Dimension(80, 0));
@@ -387,6 +437,11 @@ public class ChatFrame extends JFrame implements KeyListener {
 		panel_7.add(btnPhone);
 		
 		JButton btnVideo = new JButton("");
+		btnVideo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				sendVideo();
+			}
+		});
 		btnVideo.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/video.png")));
 		panel_7.add(btnVideo);
 		
@@ -452,17 +507,6 @@ public class ChatFrame extends JFrame implements KeyListener {
 					// TODO Auto-generated method stub
 					System.out.println("Incoming a file. " + request.getRequestor());
 					receiveFile(request, 1, null);
-//					IncomingFileTransfer transfer = request.accept();
-//					try {
-//						transfer.recieveFile(new File("C:\\Users\\Admin\\Desktop\\"+request.getFileName()));
-//					} catch (SmackException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//	                System.out.println("File " + request.getFileName() + " Received Successfully");
 				}
 				
 			});
@@ -1138,6 +1182,36 @@ public class ChatFrame extends JFrame implements KeyListener {
 		}
 	}
 	
+	public static void sendVideo() {
+		Message videoMsg = new Message();
+		videoMsg.setSubject("Video");
+		videoMsg.setBody("https://appear.in/lljchat");
+		try {
+			chat.sendMessage(videoMsg);
+			String time = DateUtil.format3(new Date());
+			String insertMessage = "You want to have a video talk with " + videoMsg.getTo().toString().split("@")[0] +" at " + time +".";
+			intsertMsg(null, insertMessage, 1);
+			try {
+				String cmdStr = "cmd /c start chrome https://appear.in/lljchat";  
+				Runtime.getRuntime().exec(cmdStr);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				try {  
+		            URI uri=new URI("https://appear.in/lljchat");  
+		            Desktop.getDesktop().browse(uri);   
+		        } catch (IOException e4) {  
+		            e4.printStackTrace();  
+		        } catch (URISyntaxException e4) {  
+		            e4.printStackTrace();  
+		        }  
+			}  
+		} catch (NotConnectedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Shake the chatting window.
 	 */
@@ -1226,6 +1300,12 @@ public class ChatFrame extends JFrame implements KeyListener {
 			}
 			if(selectedVoice.equals("河南话-青年男生(小坤)")){
 				personVoice = "vixk";
+			}
+			if(selectedVoice.equals("粤语-青年男声(大龙)")){
+				personVoice = "dalong";
+			}
+			if(selectedVoice.equals("粤语-青年女声(小梅)")){
+				personVoice = "xiaomei";
 			}
 		}
 	}

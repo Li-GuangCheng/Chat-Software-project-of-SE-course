@@ -33,6 +33,11 @@ public class DateUtil {
 		return format(date, "HH:mm:ss"); //modified with wangxz im 2014-5-4
 	}
 	
+	public static String format4(Date date) {
+//		return format(date, "yyyy-MM-dd HH:mm:ss");
+		return format(date, "yyyyMMddHHmmss"); //modified with wangxz im 2014-5-4
+	}
+	
 	/**
 	 * 
 	 *  @Enclosing_Method  : calculateDate

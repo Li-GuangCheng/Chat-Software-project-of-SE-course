@@ -44,7 +44,7 @@ public class TestFriendTree {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 627, 465);
+		frame.setBounds(100, 100, 627, 580);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 //		JTree tree = new JTree();
@@ -80,15 +80,15 @@ public class TestFriendTree {
 		root.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons16/user.png")));
 		
 		for (int i = 0; i < 5; i++) {
-			FriendTreeNode child = new FriendTreeNode("Child" + i);
-			child.setNickname("Child" + i);
+			FriendTreeNode child = new FriendTreeNode("Group" + i);
+			child.setNickname("Child" + (i+1));
 			child.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons16/user.png")));
 			child.setSignature("I am child" + i);
 			for(int j = 0; j< 6; j++){
-				FriendTreeNode childj = new FriendTreeNode("Child" + i + "" + j);
-				childj.setNickname("Child" + i + "" + j);
+				FriendTreeNode childj = new FriendTreeNode("Friend" + "" + j);
+				childj.setNickname("Friend" + "" + (j+1));
 				childj.setImg(new ImageIcon(TestFriendTree.class.getResource("/Icons32/man.png")));
-				childj.setSignature("I am child" + i + "" + j);
+				childj.setSignature("I am friend" + "" + (j+1));
 				child.addChild(childj);
 			}
 			root.addChild(child);
@@ -98,11 +98,11 @@ public class TestFriendTree {
 		tree.setModel(jMode);
 		tree.setCellRenderer(new FriendTreeRender());
 		tree.setRootVisible(false);
-//		tree.setToggleClickCount(1); //设置展开节点之前的鼠标单击数为1
+		tree.setToggleClickCount(1); //设置展开节点之前的鼠标单击数为1
 		
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setPreferredSize(new Dimension(200, 0));
+		scrollPane.setPreferredSize(new Dimension(170, 540));
 		frame.getContentPane().add(scrollPane, BorderLayout.WEST);
 		scrollPane.setViewportView(tree);
 	}

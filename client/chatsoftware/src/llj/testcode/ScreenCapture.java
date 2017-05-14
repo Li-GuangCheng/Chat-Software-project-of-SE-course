@@ -27,6 +27,10 @@ public class ScreenCapture {
     // test main  
     public static void main(String[] args) throws Exception {  
         String userdir = System.getProperty("user.dir");  
+        File picPath = new File("C:/temp");
+        if(!picPath.exists()){
+        	picPath.mkdir();
+        }
         File tempFile = new File("C:/temp", "temp.png");  
         ScreenCapture capture = ScreenCapture.getInstance();  
         capture.captureImage();  

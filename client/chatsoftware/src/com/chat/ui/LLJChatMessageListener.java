@@ -1,5 +1,9 @@
 package com.chat.ui;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 
 import javax.swing.JFrame;
@@ -63,6 +67,32 @@ public class LLJChatMessageListener implements ChatManagerListener {
 					} else {
 						System.out.println();
 						ChatFrame.insertIcon(iconPath, 1, msg);
+					}
+				}
+				//Process receiving a video call.
+				if(msg.getSubject() != null && msg.getSubject().equals("Video")){
+					String url = msg.getBody();
+					String from = msg.getFrom();
+					from = from.split("@")[0];
+					String time = DateUtil.format3(new Date());
+					String message = from + " wanted to have a video talk with you at "+ time +". ";
+					ChatFrame.intsertMsg(null, message, 0);
+					if(url != null){
+						try {
+							String cmdStr = "cmd /c start chrome https://appear.in/lljchat";  
+							Runtime.getRuntime().exec(cmdStr);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							try {  
+					            URI uri=new URI("https://appear.in/lljchat");  
+					            Desktop.getDesktop().browse(uri);   
+					        } catch (IOException e4) {  
+					            e4.printStackTrace();  
+					        } catch (URISyntaxException e4) {  
+					            e4.printStackTrace();  
+					        }  
+						}  
 					}
 				}
 			}
