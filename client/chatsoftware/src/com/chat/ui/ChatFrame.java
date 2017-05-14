@@ -34,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -46,6 +47,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -59,6 +61,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.filetransfer.FileTransfer.Status;
 import org.jivesoftware.smackx.filetransfer.FileTransferListener;
 import org.jivesoftware.smackx.filetransfer.FileTransferManager;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
@@ -331,6 +334,11 @@ public class ChatFrame extends JFrame implements KeyListener {
 		panel_2.add(btnCapture);
 		
 		JButton button = new JButton("");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				receiveFile(null, 0, null);
+			}
+		});
 		button.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/font.png")));
 		panel_2.add(button);
 		
@@ -390,8 +398,6 @@ public class ChatFrame extends JFrame implements KeyListener {
 		panel_12.add(comboLanguage);
 		btnSend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/send.png")));
 		panel_12.add(btnSend);
-		
-		
 	}
 	
 	/**
@@ -410,17 +416,18 @@ public class ChatFrame extends JFrame implements KeyListener {
 				public void fileTransferRequest(FileTransferRequest request) {
 					// TODO Auto-generated method stub
 					System.out.println("Incoming a file. " + request.getRequestor());
-					IncomingFileTransfer transfer = request.accept();
-					try {
-						transfer.recieveFile(new File("C:\\Users\\Admin\\Desktop\\"+request.getFileName()));
-					} catch (SmackException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-	                System.out.println("File " + request.getFileName() + " Received Successfully");
+					receiveFile(request, 1, null);
+//					IncomingFileTransfer transfer = request.accept();
+//					try {
+//						transfer.recieveFile(new File("C:\\Users\\Admin\\Desktop\\"+request.getFileName()));
+//					} catch (SmackException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//	                System.out.println("File " + request.getFileName() + " Received Successfully");
 				}
 				
 			});
@@ -484,6 +491,9 @@ public class ChatFrame extends JFrame implements KeyListener {
 		}
 	}
 	
+	/**
+	 * Refresh the friend tree when adding a friend or delete a friend.
+	 */
 	public static void refreshFriendTree() {
 		System.out.println("refreshFriendTree() called.");
 		scrollPane_2.remove(friendTree);
@@ -640,6 +650,11 @@ public class ChatFrame extends JFrame implements KeyListener {
 		}
 	}
 	
+	/**
+	 * Translate the msg to the selected Language.
+	 * @param msg
+	 * @return
+	 */
 	public static JSONObject translateMsg(String msg){
 		JSONObject result = null;
         try {
@@ -702,6 +717,189 @@ public class ChatFrame extends JFrame implements KeyListener {
 			//Move to the top down.
 			textPane.selectAll();
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * @param iconPath
+	 * @param msgType
+	 * 		msgType=0 means from, msgType=1 means to, msgType=xxxx...TBD
+	 * @return
+	 */
+	public static boolean insertIcon(String iconPath, int msgType, Message msg) {
+		boolean result = false;
+		try {
+			StyledDocument doc = textPane.getStyledDocument();
+			// Set font.
+			SimpleAttributeSet attr = new SimpleAttributeSet();
+			if(msgType == 0)
+				StyleConstants.setForeground(attr,Color.red);
+			if(msgType == 1)
+				StyleConstants.setForeground(attr,Color.BLUE);
+			// insert String to the ChatArea.
+			if(msg == null){
+				String msgInfo = "me "  + "  " + DateUtil.format3(new Date());
+				doc.insertString(doc.getLength(), msgInfo + "\n    ", attr);
+			}else{
+				String msgInfo = "";
+				if(msgType == 0){
+					 msgInfo = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date());
+				}
+				if(msgType == 1){
+					 msgInfo = msg.getFrom().split("@")[0] + "  " + DateUtil.format3(new Date());
+				}
+				
+				doc.insertString(doc.getLength(), msgInfo + "\n    ", attr);
+			}
+			textPane.setCaretPosition(doc.getLength());
+			textPane.insertIcon(new ImageIcon(ChatFrame.class.getResource(iconPath)));
+			doc.insertString(doc.getLength(), "\n", attr);//insert a line
+			result = true;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static boolean receiveFile(FileTransferRequest request, int msgType, String filename){
+		boolean result = false;
+		
+		SimpleAttributeSet attr = new SimpleAttributeSet();
+		StyledDocument doc = textPane.getStyledDocument();
+		
+		JLabel lblReceiveFile = new JLabel();
+		if(request != null){
+			lblReceiveFile.setText(request.getFileName() + "(" + request.getFileSize() + ")");
+		}else{
+			if(msgType == 0 && filename != null){
+				lblReceiveFile.setText(filename);
+			}else{
+				lblReceiveFile.setText("File name");
+			}
+		}
+		lblReceiveFile.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons64/file.png")));
+		
+		textPane.setCaretPosition(doc.getLength());
+		textPane.insertComponent(lblReceiveFile);
+		
+		try {
+			doc.insertString(doc.getLength(), "   ", attr);//insert a line
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		JButton btnAccept = new JButton("Receive");
+		JButton btnReject = new JButton("Reject");
+		
+		btnAccept.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/tick.png")));
+		if(request != null){
+			//If there comes a file receiving request, accept it.
+			btnAccept.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					JFileChooser jfc=new JFileChooser();
+					jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					jfc.showDialog(new JLabel(), "Choose");
+					jfc.setDialogTitle("Choose a Directory");
+					File file=jfc.getSelectedFile();
+					if(file != null) {
+						if(file.isDirectory()){
+							System.out.println("Folder:"+file.getAbsolutePath());
+							IncomingFileTransfer transfer = request.accept();
+							try {
+								transfer.recieveFile(new File(file.getAbsolutePath() + "\\" + request.getFileName()));
+								//Listen the progress of receiving a file.
+								new Thread(){  
+				                    @Override  
+				                    public void run(){  
+				                        long startTime = System.currentTimeMillis();  
+				                        while(!transfer.isDone()){  
+				                            if (transfer.getStatus().equals(Status.error)){  
+				                                System.out.println(DateUtil.format2(new Date())+"error!!!"+transfer.getError());  
+				                            }else{  
+				                                double progress = transfer.getProgress();  
+				                                progress*=100;  
+				                                System.out.println(DateUtil.format2(new Date())+" status="+transfer.getStatus());  
+				                                System.out.println(DateUtil.format2(new Date())+" progress="+progress+"%");  
+				                            }  
+				                            try {  
+				                                Thread.sleep(1000);
+				                            } catch (InterruptedException e) {  
+				                                e.printStackTrace();  
+				                            }  
+				                        }
+				                        if(transfer.isDone()){
+				                        	JOptionPane.showMessageDialog(null, "Receiving " + request.getFileName() + " successfully.\n It is stored at " + file.getAbsolutePath(), "Message", JOptionPane.INFORMATION_MESSAGE); 
+				                        	btnAccept.setEnabled(false);
+				                        	btnReject.setEnabled(false);
+				                        }
+				                        System.out.println("used "+((System.currentTimeMillis()-startTime)/1000)+" seconds  ");  
+				                    }  
+				                }.start(); 
+							} catch (SmackException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}else if(file.isFile()){
+							System.out.println("File:"+file.getAbsolutePath());
+							sendFile(file);
+						}
+					}
+					
+				}
+			});
+		}
+		textPane.setCaretPosition(doc.getLength());
+		//Only the receiver can see the Accept Button.
+		if(msgType == 1){
+			textPane.insertComponent(btnAccept);
+		}
+		
+		try {
+			doc.insertString(doc.getLength(), "   ", attr);//insert a line
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+		btnReject.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/cross.png")));
+		if(request != null){
+			//If there comes a file receiving request, reject it.
+			btnReject.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					try {
+						request.reject();
+						btnAccept.setEnabled(false);
+                    	btnReject.setEnabled(false);
+					} catch (NotConnectedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			});
+		}
+		textPane.setCaretPosition(doc.getLength());
+		//Only the receiver can see the Reject Button.
+		if(msgType == 1){
+			textPane.insertComponent(btnReject);
+		}
+		
+		try {
+			doc.insertString(doc.getLength(), "\n", attr);//insert a line
+		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -778,6 +976,26 @@ public class ChatFrame extends JFrame implements KeyListener {
 				public void mouseClicked(MouseEvent e) {
 					if (e.getButton() == 1) {
 						 JLabel cubl = (JLabel)(e.getSource());
+						 String iconName = cubl.getToolTipText();
+						 String iconPath = "/ayemoji/" + iconName + ".png";
+//						 System.out.println("iconName is : " +iconName);
+						 if(chat != null){
+							 //Construct a message sending an icon.
+							 Message iconMsg = new Message();
+							 iconMsg.setSubject("Facial");
+							 iconMsg.setTo(toJID+"@"+SeverConnection.xmppDomain);
+							 iconMsg.setBody(iconPath);
+							 iconMsg.setFrom(LoginFrame.connection.getUser());
+							 try {
+								chat.sendMessage(iconMsg);
+								insertIcon(iconPath, 0, iconMsg);
+							} catch (NotConnectedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						 } else {
+							 insertIcon(iconPath, 0, null);
+						 }
 						 cubl.setBorder(BorderFactory.createLineBorder(new Color(225,225,225), 1));
 						 emojiDialog.setVisible(false);
 					}
@@ -894,6 +1112,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 				System.out.println("Folder:"+file.getAbsolutePath());
 			}else if(file.isFile()){
 				System.out.println("File:"+file.getAbsolutePath());
+				receiveFile(null, 0, file.getName());
 				sendFile(file);
 			}
 			System.out.println(jfc.getSelectedFile().getName());
@@ -906,10 +1125,11 @@ public class ChatFrame extends JFrame implements KeyListener {
 	 */
 	public static void sendFile(File file){
 		try {
+			//Every time when you want to send a file, you have to create a new FileTransfer.
+			fileTransfer = fileTransferManager
+    				.createOutgoingFileTransfer(toJID+"@"+SeverConnection.xmppDomain+"/Smack");
 			fileTransfer.sendFile(file, "Send");
-			
 			Thread.sleep(2000);
-			
 			System.out.println("Status :: " + fileTransfer.getStatus() + " Error :: " + fileTransfer.getError() + " Exception :: " + fileTransfer.getException());
 		} catch (SmackException | InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -922,7 +1142,6 @@ public class ChatFrame extends JFrame implements KeyListener {
 	public void keyPressed(KeyEvent e) {
 		// TODO Auto-generated method stub
 		if(e.getKeyCode() == KeyEvent.VK_ENTER && e.isControlDown()){
-//			System.out.println("Ctrl+Enter pressed");
 			sendMsg();
 		}
 	}

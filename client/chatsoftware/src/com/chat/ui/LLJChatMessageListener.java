@@ -54,6 +54,16 @@ public class LLJChatMessageListener implements ChatManagerListener {
 					String message = from + "  SHAKED your dialog at "+ time +". ";
 					ChatFrame.intsertMsg(message, 0);
 				}
+				//Process receiving an icon.
+				if(msg.getSubject() != null && msg.getSubject().equals("Facial")){
+					String iconPath = msg.getBody();
+					if(iconPath.indexOf(".png") == -1){
+						System.out.println("not an icon message.");
+					} else {
+						System.out.println();
+						ChatFrame.insertIcon(iconPath, 1, msg);
+					}
+				}
 			}
 
 			@Override
