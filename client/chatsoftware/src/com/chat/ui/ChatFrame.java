@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
 
@@ -387,7 +388,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 		        	picPath.mkdir();
 		        }
 		        try {
-		        	String fileName = DateUtil.format4(new Date()) + RandomUtil.generateString(4);
+		        	String fileName = "ScreCap_"+DateUtil.format4(new Date()) + RandomUtil.generateString(4);
 					File tempFile = new File("C:/temp", fileName+".png");  
 					ScreenCapture capture = ScreenCapture.getInstance();  
 					capture.captureImage();  
@@ -881,7 +882,9 @@ public class ChatFrame extends JFrame implements KeyListener {
 		
 		JLabel lblReceiveFile = new JLabel();
 		if(request != null){
-			lblReceiveFile.setText(request.getFileName() + "(" + request.getFileSize() + ")");
+			long fileSize = request.getFileSize();
+			String fileSizeString = formetFileSize(fileSize);
+			lblReceiveFile.setText(request.getFileName() + "(" + fileSizeString + ")");
 		}else{
 			if(msgType == 0 && filename != null){
 				lblReceiveFile.setText(filename);
@@ -1012,6 +1015,25 @@ public class ChatFrame extends JFrame implements KeyListener {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * @param fileSize
+	 * @return
+	 */
+	public static String formetFileSize(long fileSize) {
+		DecimalFormat df = new DecimalFormat("#.00");
+		String fileSizeString = "";
+		if (fileSize < 1024) {
+			fileSizeString = df.format((double) fileSize) + "Bytes";
+		} else if (fileSize < 1048576) {
+			fileSizeString = df.format((double) fileSize / 1024) + "KB";
+		} else if (fileSize < 1073741824) {
+			fileSizeString = df.format((double) fileSize / 1048576) + "MB";
+		} else {
+			fileSizeString = df.format((double) fileSize / 1073741824) + "GB";
+		}
+		return fileSizeString;
 	}
 	
 	/**
