@@ -26,6 +26,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -64,11 +65,19 @@ import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
 import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.baidu.translate.demo.TransApi;
 import com.llj.network.SeverConnection;
 import com.llj.util.DateUtil;
 
 public class ChatFrame extends JFrame implements KeyListener {
 
+	//Baidu translate API keys
+	private static final String APP_ID = "20170514000047354";
+    private static final String SECURITY_KEY = "povvc119uWhgvDB4YpIq";
+    private static TransApi api = new TransApi(APP_ID, SECURITY_KEY);
+	
 	private JPanel contentPane;
 	//textPane is the record about the textfield. 
 	//textMessage is the input textfidld.
@@ -84,6 +93,8 @@ public class ChatFrame extends JFrame implements KeyListener {
 	private static String toJID = "";// The selected person's name from the friend tree.
 	private static JTree friendTree;
 	private static JScrollPane scrollPane_2;
+	private static JComboBox comboLanguage;
+	private static JCheckBox chckbxTranslate;
 
 	/**
 	 * Launch the application.
@@ -354,7 +365,7 @@ public class ChatFrame extends JFrame implements KeyListener {
 		JPanel panel_12 = new JPanel();
 		panel_10.add(panel_12, BorderLayout.EAST);
 		
-		JCheckBox chckbxTranslate = new JCheckBox("Translate");
+		chckbxTranslate = new JCheckBox("Translate");
 		panel_12.add(chckbxTranslate);
 		
 		JButton btnSend = new JButton("Send");
@@ -364,6 +375,19 @@ public class ChatFrame extends JFrame implements KeyListener {
 				sendMsg();
 			}
 		});
+		
+		comboLanguage = new JComboBox();
+		{
+			comboLanguage.addItem(new LanguageItem("zh", "Chinese"));
+			comboLanguage.addItem(new LanguageItem("cht", "Chinese(Triditional)"));
+			comboLanguage.addItem(new LanguageItem("en", "English"));
+			comboLanguage.addItem(new LanguageItem("yue", "Cantonese"));
+			comboLanguage.addItem(new LanguageItem("jp", "Japanese"));
+			comboLanguage.addItem(new LanguageItem("kor", "Korean"));
+			comboLanguage.addItem(new LanguageItem("fra", "French"));
+			comboLanguage.addItem(new LanguageItem("de", "German"));
+		}
+		panel_12.add(comboLanguage);
 		btnSend.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/send.png")));
 		panel_12.add(btnSend);
 		
@@ -572,12 +596,26 @@ public class ChatFrame extends JFrame implements KeyListener {
 	 */
 	public void sendMsg(){
 		String msg = textMessage.getText();
+		JSONObject translateRst = null;
+		if(chckbxTranslate != null && chckbxTranslate.isSelected()){
+			translateRst = translateMsg(msg);
+		}
 		if(!StringUtils.isEmpty(msg)){
 			Message msgTo = new Message();
+			if(translateRst != null){
+//				msg = translateRst.getString("dst") + "("+translateRst.getString("src")+")";
+				msg = translateRst.getString("dst");
+			}
 			msgTo.setBody(msg);
 			try {
 				chat.sendMessage(msgTo);
-				String insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + msg;
+				String insertMsg = "";
+				if(translateRst != null){
+//					insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + translateRst.getString("src") + "("+translateRst.getString("dst")+")";
+					insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + translateRst.getString("src");
+				}else{
+					insertMsg = LoginFrame.connection.getUser().split("@")[0] + "  " + DateUtil.format3(new Date()) + "\n    " + msg;
+				}
 				if(intsertMsg(insertMsg, 1)){
 					try {
 						System.out.println("Message sent out successfully :" + msg);
@@ -600,6 +638,26 @@ public class ChatFrame extends JFrame implements KeyListener {
 			//TODO This part show be changed to a message box to inform user of instruction.
 			System.out.println("The sending message cannot be empty.");
 		}
+	}
+	
+	public static JSONObject translateMsg(String msg){
+		JSONObject result = null;
+        try {
+        	LanguageItem selectedLan = (LanguageItem) comboLanguage.getSelectedItem();
+        	String lan = "en";//Default language is language.
+        	if(selectedLan != null){
+        		lan = selectedLan.getValue();
+        		System.out.println("Translate to " + selectedLan.getText());
+        	}
+			JSONObject jsonObj = JSONObject.parseObject(api.getTransResult(msg, "auto", lan));
+			JSONArray jsonArray = jsonObj.getJSONArray("trans_result");
+			result = jsonArray.getJSONObject(0);
+			System.out.println(result.toJSONString());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 	private static void addPopup(Component component, final JPopupMenu popup) {
