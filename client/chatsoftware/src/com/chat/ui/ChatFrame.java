@@ -13,6 +13,8 @@ import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -294,6 +296,15 @@ public class ChatFrame extends JFrame implements KeyListener {
 		mnSettings.add(menuItem_3);
 		
 		JMenuItem menuItemAbout = new JMenuItem("About");
+		menuItemAbout.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				AoubtDialog frame = new AoubtDialog();
+				ChatFrame.setLocationCenter(frame);
+				frame.setVisible(true);
+			}
+		});
 		menuItemAbout.setIcon(new ImageIcon(ChatFrame.class.getResource("/Icons16/info.png")));
 		menu.add(menuItemAbout);
 		
@@ -451,6 +462,19 @@ public class ChatFrame extends JFrame implements KeyListener {
 		panel_9.setLayout(new BorderLayout(0, 0));
 		
 		textMessage = new JTextPane();
+		textMessage.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				// TODO Auto-generated method stub
+				textMessage.setBackground(UIManager.getColor("Panel.background"));
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				// TODO Auto-generated method stub
+				textMessage.setBackground(Color.WHITE);
+			}
+		});
 		textMessage.addKeyListener(this);
 		textMessage.setBackground(UIManager.getColor("Panel.background"));
 		JScrollPane scrollPane = new JScrollPane(textMessage);

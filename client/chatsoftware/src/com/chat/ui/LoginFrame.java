@@ -14,6 +14,7 @@ import java.awt.event.KeyListener;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -66,7 +67,7 @@ public class LoginFrame extends JFrame implements KeyListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 380, 258);
 		contentPane = new JPanel();
-		contentPane.setBackground(UIManager.getColor("Panel.background"));
+		contentPane.setBackground(Color.CYAN);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(new GridLayout(5, 1, 8, 8));
@@ -79,6 +80,7 @@ public class LoginFrame extends JFrame implements KeyListener {
 		panel_1.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_5 = new JPanel();
+		setNoBackground(panel_5);
 		panel_1.add(panel_5, BorderLayout.EAST);
 		
 		JButton btnNetworkSettings = new JButton("");
@@ -128,6 +130,7 @@ public class LoginFrame extends JFrame implements KeyListener {
 		panel_4.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		JCheckBox chckbxRememberPassword = new JCheckBox("Remember Password               ");
+		setNoBackground(chckbxRememberPassword);
 		panel_4.add(chckbxRememberPassword);
 		
 		JButton btnLogin = new JButton("Login");
@@ -180,7 +183,7 @@ public class LoginFrame extends JFrame implements KeyListener {
 			System.out.println("username is '"+username+"'");
 			System.out.println("password is '"+password+"'");
 //			connection = SeverConnection.login("lgc", "111111");
-			connection = SeverConnection.login(username, "111111");
+			connection = SeverConnection.login(username, password);
 			heartBeats = SeverConnection.heartBeats(connection);
 			if(connection.isConnected()){
 				if(connection.isAuthenticated()){
@@ -196,6 +199,13 @@ public class LoginFrame extends JFrame implements KeyListener {
 				JOptionPane.showMessageDialog(null, "Failed to connnect to server!", "Error", JOptionPane.ERROR_MESSAGE); 
 			}
 		}
+	}
+	
+	public static void setNoBackground(JComponent component){
+		component.setForeground(new Color(51, 102, 204));
+		component.setBackground(new Color(0,0,255));
+		component.setOpaque(false);
+		component.setBorder(null);
 	}
 
 	@Override

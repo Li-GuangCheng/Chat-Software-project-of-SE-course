@@ -11,9 +11,9 @@ import javax.swing.JTextPane;
 
 import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManagerListener;
+import org.jivesoftware.smack.chat.ChatMessageListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.chatstates.ChatState;
-import org.jivesoftware.smackx.chatstates.ChatStateListener;
 
 import com.llj.util.DateUtil;
 
@@ -31,7 +31,7 @@ public class LLJChatMessageListener implements ChatManagerListener {
 	@Override
 	public void chatCreated(Chat chat, boolean arg1) {
 		// TODO Auto-generated method stub
-		chat.addMessageListener(new ChatStateListener() {
+		chat.addMessageListener(new ChatMessageListener() {
 
 			@Override
 			public void processMessage(Chat chat, Message msg) {
@@ -97,11 +97,11 @@ public class LLJChatMessageListener implements ChatManagerListener {
 				}
 			}
 
-			@Override
-			public void stateChanged(Chat chat, ChatState state) {
-				// TODO Auto-generated method stub
-				System.out.println("stateChanged");
-			}
+//			@Override
+//			public void stateChanged(Chat chat, ChatState state) {
+//				// TODO Auto-generated method stub
+//				System.out.println("stateChanged");
+//			}
 			
 		});
 	}
